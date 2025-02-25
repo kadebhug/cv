@@ -3,22 +3,22 @@ import { ResumeData } from '../types/resume';
 export const sampleResumeData: ResumeData = {
   personal: {
     jobTitle: 'Senior Software Engineer',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    country: 'United States',
-    city: 'San Francisco',
-    address: '123 Tech Street',
-    postalCode: '94107',
+    firstName: 'Sipho',
+    lastName: 'Nkosi',
+    email: 'sipho.nkosi@example.co.za',
+    phone: '+27 (083) 123 4567',
+    country: 'South Africa',
+    city: 'Cape Town',
+    address: '123 Long Street',
+    postalCode: '8001',
   },
   professionalSummary: 'Results-driven software engineer with 8+ years of experience developing scalable web applications. Proficient in React, Node.js, and cloud technologies. Led multiple successful projects and mentored junior developers. Passionate about clean code and user-centric design.',
   experience: [
     {
       jobTitle: 'Senior Software Engineer',
-      employer: 'Tech Solutions Inc.',
-      city: 'San Francisco',
-      country: 'United States',
+      employer: 'Takealot Tech',
+      city: 'Cape Town',
+      country: 'South Africa',
       startDate: '2020-01-01',
       endDate: '',
       current: true,
@@ -26,9 +26,9 @@ export const sampleResumeData: ResumeData = {
     },
     {
       jobTitle: 'Software Developer',
-      employer: 'Digital Innovations',
-      city: 'Boston',
-      country: 'United States',
+      employer: 'Luno',
+      city: 'Johannesburg',
+      country: 'South Africa',
       startDate: '2017-03-15',
       endDate: '2019-12-31',
       current: false,
@@ -37,24 +37,24 @@ export const sampleResumeData: ResumeData = {
   ],
   education: [
     {
-      school: 'Massachusetts Institute of Technology',
+      school: 'University of Cape Town',
       degree: 'Master of Science in Computer Science',
-      city: 'Cambridge',
-      country: 'United States',
-      startDate: '2015-09-01',
-      endDate: '2017-05-30',
+      city: 'Cape Town',
+      country: 'South Africa',
+      startDate: '2015-02-01',
+      endDate: '2016-11-30',
       current: false,
-      description: 'Specialized in Artificial Intelligence and Machine Learning. Graduated with honors.'
+      description: 'Specialized in Artificial Intelligence and Machine Learning. Graduated with distinction.'
     },
     {
-      school: 'University of California, Berkeley',
+      school: 'University of the Witwatersrand',
       degree: 'Bachelor of Science in Computer Science',
-      city: 'Berkeley',
-      country: 'United States',
-      startDate: '2011-09-01',
-      endDate: '2015-05-30',
+      city: 'Johannesburg',
+      country: 'South Africa',
+      startDate: '2011-02-01',
+      endDate: '2014-11-30',
       current: false,
-      description: 'Dean\'s List, Computer Science Student Association, Hackathon Winner'
+      description: 'Dean\'s Merit List, Computer Science Student Association, MTN App Challenge Winner'
     }
   ],
   skills: [
@@ -68,9 +68,9 @@ export const sampleResumeData: ResumeData = {
     { name: 'CI/CD', level: 'intermediate' }
   ],
   socialLinks: [
-    { platform: 'LinkedIn', url: 'https://linkedin.com/in/johndoe' },
-    { platform: 'GitHub', url: 'https://github.com/johndoe' },
-    { platform: 'Portfolio', url: 'https://johndoe.dev' }
+    { platform: 'LinkedIn', url: 'https://linkedin.com/in/siphonkosi' },
+    { platform: 'GitHub', url: 'https://github.com/siphonkosi' },
+    { platform: 'Portfolio', url: 'https://siphonkosi.co.za' }
   ],
-  hobbies: ['Hiking', 'Photography', 'Open Source Contributing', 'Chess']
+  hobbies: ['Rugby', 'Braai', 'Open Source Contributing', 'Wildlife Photography']
 }; 

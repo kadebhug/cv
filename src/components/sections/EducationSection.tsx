@@ -49,7 +49,7 @@ export function EducationSection() {
                 <input
                   type="text"
                   {...register(`education.${index}.school`)}
-                  placeholder="e.g. Stanford University"
+                  placeholder="e.g. University of Cape Town"
                   className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 />
               </div>
@@ -59,7 +59,7 @@ export function EducationSection() {
                 <input
                   type="text"
                   {...register(`education.${index}.degree`)}
-                  placeholder="e.g. Bachelor of Science in Computer Science"
+                  placeholder="e.g. BSc Computer Science"
                   className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 />
               </div>
@@ -69,7 +69,7 @@ export function EducationSection() {
                 <input
                   type="text"
                   {...register(`education.${index}.city`)}
-                  placeholder="e.g. Stanford"
+                  placeholder="e.g. Cape Town"
                   className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 />
               </div>
@@ -79,7 +79,7 @@ export function EducationSection() {
                 <input
                   type="text"
                   {...register(`education.${index}.country`)}
-                  placeholder="e.g. United States"
+                  placeholder="e.g. South Africa"
                   className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 />
               </div>

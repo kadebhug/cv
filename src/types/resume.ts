@@ -8,6 +8,7 @@ export interface PersonalInfo {
   city: string
   address: string
   postalCode: string
+  photo?: string  // Base64 encoded image data
 }
 
 export interface SocialLink {

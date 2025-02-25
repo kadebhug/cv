@@ -56,7 +56,7 @@ export function ExperienceSection() {
                 <input
                   type="text"
                   {...register(`experience.${index}.jobTitle`)}
-                  placeholder="e.g. Senior Software Engineer"
+                  placeholder="e.g. Senior Software Developer"
                   className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 />
               </div>
@@ -66,7 +66,7 @@ export function ExperienceSection() {
                 <input
                   type="text"
                   {...register(`experience.${index}.employer`)}
-                  placeholder="e.g. Google"
+                  placeholder="e.g. Takealot"
                   className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 />
               </div>
@@ -76,7 +76,7 @@ export function ExperienceSection() {
                 <input
                   type="text"
                   {...register(`experience.${index}.city`)}
-                  placeholder="e.g. San Francisco"
+                  placeholder="e.g. Cape Town"
                   className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 />
               </div>
@@ -86,7 +86,7 @@ export function ExperienceSection() {
                 <input
                   type="text"
                   {...register(`experience.${index}.country`)}
-                  placeholder="e.g. United States"
+                  placeholder="e.g. South Africa"
                   className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 />
               </div>

@@ -10,6 +10,7 @@ export const personalSchema = z.object({
   city: z.string().min(1, 'City is required'),
   address: z.string().min(1, 'Address is required'),
   postalCode: z.string().min(1, 'Postal code is required'),
+  photo: z.string().optional(),
 })
 
 export const experienceSchema = z.object({

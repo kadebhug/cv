@@ -1,9 +1,16 @@
 import { useFormContext } from 'react-hook-form'
 import { ResumeData } from '../../types/resume'
 import { FaUser } from 'react-icons/fa'
+import { ImageUploader } from '../ImageUploader'
 
 export function PersonalSection() {
-  const { register, formState: { errors } } = useFormContext<ResumeData>()
+  const { register, formState: { errors }, setValue, watch } = useFormContext<ResumeData>()
+  
+  const photo = watch('personal.photo')
+  
+  const handlePhotoChange = (value: string) => {
+    setValue('personal.photo', value, { shouldValidate: true, shouldDirty: true })
+  }
 
   return (
     <div className="space-y-6">
@@ -24,6 +31,19 @@ export function PersonalSection() {
         </div>
       </div>
 
+      {/* Profile Photo */}
+      <div className="flex justify-center">
+        <div className="w-full max-w-xs">
+          <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
+            Profile Photo
+          </label>
+          <ImageUploader 
+            value={photo} 
+            onChange={handlePhotoChange} 
+          />
+        </div>
+      </div>
+
       {/* Form Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="col-span-2">
@@ -31,7 +51,7 @@ export function PersonalSection() {
           <input
             type="text"
             {...register('personal.jobTitle')}
-            placeholder="e.g. Senior Software Engineer"
+            placeholder="e.g. Senior Software Developer"
             className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
           />
           {errors.personal?.jobTitle && (
@@ -44,7 +64,7 @@ export function PersonalSection() {
           <input
             type="text"
             {...register('personal.firstName')}
-            placeholder="e.g. John"
+            placeholder="e.g. Sipho"
             className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
           />
         </div>
@@ -54,7 +74,7 @@ export function PersonalSection() {
           <input
             type="text"
             {...register('personal.lastName')}
-            placeholder="e.g. Doe"
+            placeholder="e.g. Nkosi"
             className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
           />
         </div>
@@ -64,7 +84,7 @@ export function PersonalSection() {
           <input
             type="email"
             {...register('personal.email')}
-            placeholder="e.g. john.doe@example.com"
+            placeholder="e.g. sipho.nkosi@example.co.za"
             className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
           />
         </div>
@@ -74,7 +94,7 @@ export function PersonalSection() {
           <input
             type="tel"
             {...register('personal.phone')}
-            placeholder="e.g. +1 234 567 890"
+            placeholder="e.g. +27 83 123 4567"
             className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
           />
         </div>
@@ -84,7 +104,7 @@ export function PersonalSection() {
           <input
             type="text"
             {...register('personal.country')}
-            placeholder="e.g. United States"
+            placeholder="e.g. South Africa"
             className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
           />
         </div>
@@ -94,7 +114,7 @@ export function PersonalSection() {
           <input
             type="text"
             {...register('personal.city')}
-            placeholder="e.g. San Francisco"
+            placeholder="e.g. Cape Town"
             className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
           />
         </div>
@@ -104,7 +124,7 @@ export function PersonalSection() {
           <input
             type="text"
             {...register('personal.address')}
-            placeholder="e.g. 123 Main St"
+            placeholder="e.g. 123 Long Street"
             className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
           />
         </div>
@@ -114,7 +134,7 @@ export function PersonalSection() {
           <input
             type="text"
             {...register('personal.postalCode')}
-            placeholder="e.g. 94105"
+            placeholder="e.g. 8001"
             className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
           />
         </div>

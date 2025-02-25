@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 import { ResumeData } from '../types/resume'
 
 const styles = StyleSheet.create({
@@ -16,6 +16,14 @@ const styles = StyleSheet.create({
   main: {
     width: '70%',
     padding: 30,
+  },
+  photo: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 15,
+    alignSelf: 'center',
+    border: '3px solid white',
   },
   name: {
     fontSize: 24,
@@ -85,6 +93,12 @@ export function CreativeTemplate({ data }: { data: ResumeData }) {
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.sidebar}>
+          {data.personal?.photo && (
+            <Image 
+              src={data.personal.photo} 
+              style={styles.photo} 
+            />
+          )}
           <Text style={styles.name}>{`${data.personal?.firstName || ''} ${data.personal?.lastName || ''}`}</Text>
           <Text style={styles.jobTitle}>{data.personal?.jobTitle || ''}</Text>
           
