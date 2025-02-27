@@ -160,14 +160,14 @@ export function ResumePreviewer({ data, templateId, colorTheme = defaultColorThe
     if (isFullscreen) {
       return 'h-[calc(100vh-120px)]';
     } else if (isMobile) {
-      return 'h-[400px]';
+      return 'h-[500px]';
     } else {
-      return 'h-[calc(100vh-280px)] min-h-[600px]';
+      return 'h-full min-h-[700px]';
     }
   };
 
   return (
-    <div className={`bg-white shadow-sm rounded-lg transition-all duration-300 ${isFullscreen ? 'fixed inset-0 z-50 p-4' : 'p-4 h-full'}`}>
+    <div className={`bg-white shadow-sm rounded-lg transition-all duration-300 flex flex-col ${isFullscreen ? 'fixed inset-0 z-50 p-4' : 'p-4 h-full'}`}>
       <div className="flex flex-wrap justify-between items-center mb-3">
         <h2 className="text-lg font-semibold text-gray-900 mb-2 sm:mb-0">Resume Preview</h2>
         <div className="flex items-center space-x-2">
@@ -217,7 +217,7 @@ export function ResumePreviewer({ data, templateId, colorTheme = defaultColorThe
         </label>
       </div>
       
-      <div className={`${getViewerHeight()} ${isMobileView ? 'max-w-[375px] mx-auto' : 'w-full'}`}>
+      <div className={`${getViewerHeight()} ${isMobileView ? 'max-w-[375px] mx-auto' : 'w-full'} flex-grow`}>
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
