@@ -5,7 +5,7 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { resumeSchema } from '../schemas/resumeSchemas'
 import { ResumeData } from '../types/resume'
-import { FaUser, FaFileAlt, FaBriefcase, FaGraduationCap, FaTools, FaLink, FaPuzzlePiece, FaHeart } from 'react-icons/fa'
+import { FaUser, FaFileAlt, FaBriefcase, FaGraduationCap, FaTools, FaLink, FaPuzzlePiece, FaHeart, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 
 const sections = [
   { id: 'personal', title: 'Personal Details', icon: FaUser, description: 'Basic information about you' },
@@ -29,6 +29,7 @@ export function ResumeBuilder() {
   const [activeSection, setActiveSection] = useState<string>('personal')
   const [selectedTemplate, setSelectedTemplate] = useState('modern')
   const [isChangingTemplate, setIsChangingTemplate] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   
   // Initialize with empty values that match the ResumeData structure
   const [formData, setFormData] = useState<Partial<ResumeData>>({
@@ -96,16 +97,29 @@ export function ResumeBuilder() {
     }
   }, []);
 
+  // Toggle sidebar collapse
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1600px] mx-auto">
-        <div className="flex">
+      <div className="mx-auto">
+        <div className="flex relative">
           {/* Sidebar */}
-          <div className="w-80 min-h-screen bg-white shadow-lg fixed left-0 top-0 overflow-y-auto">
-            <div className="p-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-6">
-                Resume Builder
-              </h1>
+          <div className={`${sidebarCollapsed ? 'w-20' : 'w-64'} min-h-screen bg-white shadow-lg fixed left-0 top-0 overflow-y-auto transition-all duration-300 z-20`}>
+            <div className={`p-4 ${sidebarCollapsed ? 'px-2' : 'p-5'}`}>
+              <div className="flex items-center justify-between mb-6">
+                <h1 className={`font-bold text-gray-900 ${sidebarCollapsed ? 'text-sm' : 'text-xl'}`}>
+                  {sidebarCollapsed ? 'RB' : 'Resume Builder'}
+                </h1>
+                <button 
+                  onClick={toggleSidebar}
+                  className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
+                >
+                  {sidebarCollapsed ? <FaChevronRight size={14} /> : <FaChevronLeft size={14} />}
+                </button>
+              </div>
               
               {/* Section Navigation */}
               <nav className="space-y-1">
@@ -113,35 +127,43 @@ export function ResumeBuilder() {
                   <button
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
-                    className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'px-3'} py-2.5 text-sm font-medium rounded-md transition-colors ${
                       activeSection === section.id
                         ? 'bg-blue-50 text-blue-700'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
+                    title={sidebarCollapsed ? section.title : ''}
                   >
-                    <section.icon className="mr-3 h-5 w-5" />
-                    {section.title}
+                    <section.icon className={`${sidebarCollapsed ? 'mr-0' : 'mr-3'} h-5 w-5`} />
+                    {!sidebarCollapsed && section.title}
                   </button>
                 ))}
               </nav>
               
               {/* Template Selection */}
               <div className="mt-8">
-                <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
-                  Choose Template
-                </h2>
-                <div className="grid grid-cols-2 gap-2">
+                {!sidebarCollapsed && (
+                  <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+                    Choose Template
+                  </h2>
+                )}
+                <div className={`${sidebarCollapsed ? 'space-y-2' : 'space-y-2'}`}>
                   {templates.map(template => (
                     <button
                       key={template.id}
                       onClick={() => handleTemplateChange(template.id)}
-                      className={`p-2 border rounded-md transition-colors ${
+                      className={`w-full flex items-center justify-center py-2.5 px-3 border rounded-md transition-all duration-200 ${
                         selectedTemplate === template.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:bg-gray-50'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium shadow-sm'
+                          : 'border-gray-200 hover:bg-gray-50 text-gray-700'
                       }`}
+                      title={sidebarCollapsed ? template.name : ''}
                     >
-                      {template.name}
+                      {sidebarCollapsed ? (
+                        <span className="text-lg font-medium">{template.name.charAt(0)}</span>
+                      ) : (
+                        <span>{template.name}</span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -150,14 +172,14 @@ export function ResumeBuilder() {
           </div>
           
           {/* Main Content */}
-          <div className="flex-1 ml-80">
-            <div className="max-w-7xl mx-auto p-8">
+          <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
+            <div className="p-4 lg:p-6">
               <FormProvider {...methods}>
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                   {/* Form Section */}
-                  <div className="space-y-6">
-                    <div className="bg-white rounded-2xl shadow-sm p-6 transition-all duration-300 hover:shadow-md">
-                      <div className="mb-6">
+                  <div className="space-y-4">
+                    <div className="bg-white rounded-xl shadow-sm p-5 transition-all duration-300 hover:shadow-md">
+                      <div className="mb-5">
                         <h2 className="text-xl font-semibold text-gray-900">
                           {sections.find(s => s.id === activeSection)?.title}
                         </h2>
@@ -177,10 +199,13 @@ export function ResumeBuilder() {
                             setActiveSection(sections[currentIndex - 1].id);
                           }
                         }}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        className="px-4 py-2.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                         disabled={activeSection === sections[0].id}
                       >
-                        Previous
+                        <div className="flex items-center">
+                          <FaChevronLeft className="mr-2 h-3 w-3" />
+                          Previous
+                        </div>
                       </button>
                       <button
                         onClick={() => {
@@ -189,16 +214,19 @@ export function ResumeBuilder() {
                             setActiveSection(sections[currentIndex + 1].id);
                           }
                         }}
-                        className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
+                        className="px-4 py-2.5 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 transition-colors"
                         disabled={activeSection === sections[sections.length - 1].id}
                       >
-                        Next
+                        <div className="flex items-center">
+                          Next
+                          <FaChevronRight className="ml-2 h-3 w-3" />
+                        </div>
                       </button>
                     </div>
                   </div>
                   
                   {/* Preview Section */}
-                  <div className="xl:sticky xl:top-8">
+                  <div className="lg:sticky lg:top-4">
                     {!isChangingTemplate && (
                       <ResumePreviewer 
                         data={formData as ResumeData} 

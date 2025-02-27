@@ -1,122 +1,149 @@
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import { ResumeData } from '../../types/resume'
-import { FaLinkedin, FaGithub, FaGlobe, FaTwitter, FaLink } from 'react-icons/fa'
-
-const socialPlatforms = [
-  { id: 'LinkedIn', icon: FaLinkedin, color: '#0077B5' },
-  { id: 'GitHub', icon: FaGithub, color: '#333333' },
-  { id: 'Portfolio', icon: FaGlobe, color: '#4CAF50' },
-  { id: 'Twitter', icon: FaTwitter, color: '#1DA1F2' },
-  { id: 'Other', icon: FaLink, color: '#718096' },
-] as const
+import { FaGlobe, FaTrash, FaLinkedin, FaGithub, FaTwitter, FaInstagram, FaFacebook, FaLink, FaPlus } from 'react-icons/fa'
 
 export function SocialLinksSection() {
   const { register, control, formState: { errors } } = useFormContext<ResumeData>()
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'socialLinks'
+    name: 'socialLinks',
+    shouldUnregister: true
   })
 
+  // Common styling classes
+  const labelClass = "block text-sm font-medium text-gray-700 mb-1.5"
+  const inputClass = "w-full rounded-lg border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all duration-200 hover:border-blue-300 placeholder:text-gray-400 text-gray-700"
+  const inputGroupClass = "relative"
+  const iconClass = "absolute left-3 top-3.5 text-gray-400 z-10"
+  const inputWithIconClass = "w-full rounded-lg border-gray-300 bg-white pl-10 pr-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all duration-200 hover:border-blue-300 placeholder:text-gray-400 text-gray-700"
+  const selectClass = "w-full rounded-lg border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all duration-200 hover:border-blue-300 text-gray-700"
+  const errorClass = "mt-1.5 text-sm text-red-600"
+
+  // Social platform options with icons
+  const socialPlatforms = [
+    { value: 'linkedin', label: 'LinkedIn', icon: <FaLinkedin className="w-4 h-4" /> },
+    { value: 'github', label: 'GitHub', icon: <FaGithub className="w-4 h-4" /> },
+    { value: 'twitter', label: 'Twitter', icon: <FaTwitter className="w-4 h-4" /> },
+    { value: 'instagram', label: 'Instagram', icon: <FaInstagram className="w-4 h-4" /> },
+    { value: 'facebook', label: 'Facebook', icon: <FaFacebook className="w-4 h-4" /> },
+    { value: 'website', label: 'Personal Website', icon: <FaGlobe className="w-4 h-4" /> },
+    { value: 'other', label: 'Other', icon: <FaLink className="w-4 h-4" /> },
+  ]
+
+  // Get icon for platform
+  const getPlatformIcon = (platform: string) => {
+    const found = socialPlatforms.find(p => p.value === platform)
+    return found ? found.icon : <FaLink className="w-4 h-4" />
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg">
-        <h3 className="text-sm font-medium text-gray-700 mb-2">
-          Add your professional profiles and websites
-        </h3>
-        <p className="text-sm text-gray-500">
-          Include links to your portfolio, professional social media, or any other relevant websites.
-        </p>
+    <div className="space-y-8">
+      {/* Section Header */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-white rounded-lg shadow-sm">
+            <FaGlobe className="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-700">
+              Social Links
+            </h3>
+            <p className="text-sm text-gray-500">
+              Add your professional profiles and websites
+            </p>
+          </div>
+        </div>
       </div>
 
+      {/* Social Links Items */}
       <div className="space-y-4">
         {fields.map((field, index) => (
           <div 
             key={field.id} 
             className="group relative bg-white rounded-lg border border-gray-200 p-4 transition-all duration-200 hover:shadow-md"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-1/3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Platform
-                </label>
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  remove(index);
+                } catch (error) {
+                  console.error('Error removing social link:', error);
+                }
+              }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity absolute -right-2 -top-2 bg-red-100 text-red-600 rounded-full p-1.5 hover:bg-red-200"
+            >
+              <FaTrash className="w-3.5 h-3.5" />
+            </button>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className={labelClass}>Platform</label>
                 <select
                   {...register(`socialLinks.${index}.platform`)}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className={selectClass}
                 >
-                  {socialPlatforms.map(platform => {
-                    const Icon = platform.icon
-                    return (
-                      <option key={platform.id} value={platform.id}>
-                        {platform.id}
-                      </option>
-                    )
-                  })}
+                  <option value="">Select platform</option>
+                  {socialPlatforms.map(platform => (
+                    <option key={platform.value} value={platform.value}>
+                      {platform.label}
+                    </option>
+                  ))}
                 </select>
+                {errors.socialLinks?.[index]?.platform && (
+                  <p className={errorClass}>{errors.socialLinks[index]?.platform?.message}</p>
+                )}
               </div>
-              
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  URL
-                </label>
-                <div className="relative">
-                  {socialPlatforms.map(platform => {
-                    const Icon = platform.icon
-                    return field.platform === platform.id && (
-                      <Icon 
-                        key={platform.id}
-                        className="absolute left-3 top-1/2 -translate-y-1/2" 
-                        style={{ color: platform.color }}
-                      />
-                    )
-                  })}
+
+              <div className="md:col-span-2">
+                <label className={labelClass}>URL</label>
+                <div className={inputGroupClass}>
+                  <div className="absolute left-3 top-3.5 text-gray-400 z-10">
+                    {getPlatformIcon(field.platform)}
+                  </div>
                   <input
                     type="url"
                     {...register(`socialLinks.${index}.url`)}
-                    placeholder="https://"
-                    className="w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    placeholder={`https://${field.platform || 'example'}.com/yourprofile`}
+                    className={inputWithIconClass}
                   />
                 </div>
                 {errors.socialLinks?.[index]?.url && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.socialLinks[index]?.url?.message}
-                  </p>
+                  <p className={errorClass}>{errors.socialLinks[index]?.url?.message}</p>
                 )}
               </div>
-              
-              <button
-                type="button"
-                onClick={() => remove(index)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity absolute -right-2 -top-2 bg-red-100 text-red-600 rounded-full p-1 hover:bg-red-200"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
           </div>
         ))}
       </div>
-      
+
+      {/* Add Social Link Button */}
       <button
         type="button"
-        onClick={() => append({ platform: 'LinkedIn', url: '' })}
-        className="w-full flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors"
+        onClick={() => {
+          try {
+            append({
+              platform: '',
+              url: ''
+            });
+          } catch (error) {
+            console.error('Error adding social link:', error);
+          }
+        }}
+        className="w-full flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors"
       >
-        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
+        <FaPlus className="w-4 h-4 mr-2" />
         Add Social Link
       </button>
 
+      {/* Empty State */}
       {fields.length === 0 && (
-        <div className="text-center py-6">
-          <div className="text-gray-400 mb-2">
-            <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-            </svg>
+        <div className="text-center py-8 bg-gray-50 rounded-lg">
+          <div className="text-gray-400 mb-3">
+            <FaGlobe className="w-12 h-12 mx-auto" />
           </div>
           <p className="text-sm text-gray-500">
-            No social links added yet. Click the button above to add one.
+            No social links added yet. Click the button above to add your professional profiles.
           </p>
         </div>
       )}

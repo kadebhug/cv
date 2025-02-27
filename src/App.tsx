@@ -15,12 +15,12 @@ Font.register({
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-100 flex flex-col">
         <Navbar />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/builder" element={
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <main className="flex-1 w-full">
               <ResumeBuilder />
             </main>
           } />
