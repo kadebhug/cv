@@ -5,11 +5,26 @@ import { CreativeTemplate } from '../templates/CreativeTemplate'
 import { ResumeData, Skill } from '../types/resume'
 import { mergeWithSampleData } from '../utils/resumeUtils'
 import { useState, useEffect } from 'react'
-import { FaDownload, FaExpand, FaCompress, FaEye, FaEyeSlash } from 'react-icons/fa'
+import { FaDownload, FaExpand, FaCompress, FaEye, FaEyeSlash, FaMobileAlt, FaDesktop } from 'react-icons/fa'
+
+export interface ColorTheme {
+  id: string;
+  name: string;
+  primary: string;
+  secondary: string;
+}
+
+const defaultColorTheme: ColorTheme = {
+  id: 'blue',
+  name: 'Blue',
+  primary: '#3b82f6',
+  secondary: '#93c5fd',
+};
 
 interface ResumePreviewerProps {
   data: ResumeData
   templateId: string
+  colorTheme?: ColorTheme
 }
 
 const TemplateComponents = {
@@ -18,12 +33,28 @@ const TemplateComponents = {
   creative: CreativeTemplate,
 } as const;
 
-export function ResumePreviewer({ data, templateId }: ResumePreviewerProps) {
+export function ResumePreviewer({ data, templateId, colorTheme = defaultColorTheme }: ResumePreviewerProps) {
   const [showPlaceholders, setShowPlaceholders] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentTemplateId, setCurrentTemplateId] = useState(templateId);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
   // Handle template changes
   useEffect(() => {
@@ -105,6 +136,11 @@ export function ResumePreviewer({ data, templateId }: ResumePreviewerProps) {
     setIsFullscreen(!isFullscreen);
   };
 
+  // Toggle mobile view
+  const toggleMobileView = () => {
+    setIsMobileView(!isMobileView);
+  };
+
   // Handle download (placeholder for future implementation)
   const handleDownload = () => {
     alert('Download functionality will be implemented soon!');
@@ -119,10 +155,21 @@ export function ResumePreviewer({ data, templateId }: ResumePreviewerProps) {
     );
   }
 
+  // Calculate appropriate height based on screen size and fullscreen state
+  const getViewerHeight = () => {
+    if (isFullscreen) {
+      return 'h-[calc(100vh-120px)]';
+    } else if (isMobile) {
+      return 'h-[400px]';
+    } else {
+      return 'h-[calc(100vh-280px)] min-h-[600px]';
+    }
+  };
+
   return (
     <div className={`bg-white shadow-sm rounded-lg transition-all duration-300 ${isFullscreen ? 'fixed inset-0 z-50 p-4' : 'p-4 h-full'}`}>
-      <div className="flex justify-between items-center mb-3">
-        <h2 className="text-lg font-semibold text-gray-900">Resume Preview</h2>
+      <div className="flex flex-wrap justify-between items-center mb-3">
+        <h2 className="text-lg font-semibold text-gray-900 mb-2 sm:mb-0">Resume Preview</h2>
         <div className="flex items-center space-x-2">
           <button 
             onClick={() => setShowPlaceholders(!showPlaceholders)}
@@ -130,6 +177,13 @@ export function ResumePreviewer({ data, templateId }: ResumePreviewerProps) {
             title={showPlaceholders ? "Hide placeholders" : "Show placeholders"}
           >
             {showPlaceholders ? <FaEye size={14} /> : <FaEyeSlash size={14} />}
+          </button>
+          <button 
+            onClick={toggleMobileView}
+            className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+            title={isMobileView ? "Desktop view" : "Mobile view"}
+          >
+            {isMobileView ? <FaDesktop size={14} /> : <FaMobileAlt size={14} />}
           </button>
           <button 
             onClick={handleDownload}
@@ -148,7 +202,7 @@ export function ResumePreviewer({ data, templateId }: ResumePreviewerProps) {
         </div>
       </div>
       
-      <div className="flex items-center mb-3">
+      <div className="flex flex-wrap items-center mb-3 gap-3">
         <label className="inline-flex items-center cursor-pointer">
           <input
             type="checkbox"
@@ -163,14 +217,19 @@ export function ResumePreviewer({ data, templateId }: ResumePreviewerProps) {
         </label>
       </div>
       
-      <div className={`${isFullscreen ? 'h-[calc(100vh-120px)]' : 'h-[calc(100vh-280px)] min-h-[600px]'}`}>
+      <div className={`${getViewerHeight()} ${isMobileView ? 'max-w-[375px] mx-auto' : 'w-full'}`}>
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
           </div>
         ) : (
-          <PDFViewer width="100%" height="100%" className="rounded border border-gray-200">
-            <TemplateComponent data={displayData} />
+          <PDFViewer 
+            width="100%" 
+            height="100%" 
+            className="rounded border border-gray-200"
+            showToolbar={!isMobile}
+          >
+            <TemplateComponent data={displayData} colorTheme={colorTheme} />
           </PDFViewer>
         )}
       </div>

@@ -1,94 +1,113 @@
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 import { ResumeData } from '../types/resume'
+import { ColorTheme } from '../components/ResumePreviewer'
 
-const styles = StyleSheet.create({
-  page: {
-    padding: 0,
-    fontFamily: 'Helvetica',
-    flexDirection: 'row',
-  },
-  sidebar: {
-    width: '30%',
-    backgroundColor: '#6366f1',
-    padding: 20,
-    color: 'white',
-  },
-  main: {
-    width: '70%',
-    padding: 30,
-  },
-  photo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 15,
-    alignSelf: 'center',
-    border: '3px solid white',
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  jobTitle: {
-    fontSize: 14,
-    marginBottom: 20,
-    color: 'white',
-    opacity: 0.9,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textTransform: 'uppercase',
-  },
-  mainSectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#6366f1',
-    textTransform: 'uppercase',
-    borderBottomWidth: 2,
-    borderBottomColor: '#6366f1',
-    paddingBottom: 5,
-  },
-  skillLevel: {
-    height: 4,
-    marginTop: 4,
-    marginBottom: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
-  },
-  skillLevelFill: {
-    height: '100%',
-    backgroundColor: 'white',
-    borderRadius: 2,
-  },
-  contactItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-    fontSize: 10,
-  },
-  summary: {
-    fontSize: 11,
-    lineHeight: 1.5,
-    marginBottom: 20,
-  }
-})
-
-// Helper function to get skill level percentage
-const getSkillLevelPercentage = (level: string): number => {
-  switch (level) {
-    case 'beginner': return 25;
-    case 'intermediate': return 50;
-    case 'advanced': return 75;
-    case 'expert': return 100;
-    default: return 50;
-  }
+interface CreativeTemplateProps {
+  data: ResumeData;
+  colorTheme?: ColorTheme;
 }
 
-export function CreativeTemplate({ data }: { data: ResumeData }) {
+const defaultColorTheme: ColorTheme = {
+  id: 'blue',
+  name: 'Blue',
+  primary: '#3b82f6',
+  secondary: '#93c5fd',
+};
+
+export function CreativeTemplate({ data, colorTheme = defaultColorTheme }: CreativeTemplateProps) {
+  // Create dynamic styles with the color theme
+  const styles = StyleSheet.create({
+    page: {
+      padding: 0,
+      fontFamily: 'Helvetica',
+      flexDirection: 'row',
+    },
+    sidebar: {
+      width: '30%',
+      backgroundColor: colorTheme.primary,
+      padding: 20,
+      color: 'white',
+    },
+    main: {
+      width: '70%',
+      padding: 30,
+    },
+    photo: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      marginBottom: 15,
+      alignSelf: 'center',
+      border: '3px solid white',
+    },
+    name: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 5,
+    },
+    jobTitle: {
+      fontSize: 14,
+      marginBottom: 20,
+      color: 'white',
+      opacity: 0.9,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: 'bold',
+      marginBottom: 10,
+      textTransform: 'uppercase',
+    },
+    mainSectionTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      marginBottom: 15,
+      color: colorTheme.primary,
+      textTransform: 'uppercase',
+      borderBottomWidth: 2,
+      borderBottomColor: colorTheme.primary,
+      paddingBottom: 5,
+    },
+    skillLevel: {
+      height: 4,
+      marginTop: 4,
+      marginBottom: 12,
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+      borderRadius: 2,
+    },
+    skillLevelFill: {
+      height: '100%',
+      backgroundColor: 'white',
+      borderRadius: 2,
+    },
+    contactItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 8,
+      fontSize: 10,
+    },
+    summary: {
+      fontSize: 11,
+      lineHeight: 1.5,
+      marginBottom: 20,
+    },
+    employerText: {
+      fontSize: 12, 
+      color: colorTheme.primary, 
+      marginBottom: 3
+    }
+  });
+
+  // Helper function to get skill level percentage
+  const getSkillLevelPercentage = (level: string): number => {
+    switch (level) {
+      case 'beginner': return 25;
+      case 'intermediate': return 50;
+      case 'advanced': return 75;
+      case 'expert': return 100;
+      default: return 50;
+    }
+  }
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -160,7 +179,7 @@ export function CreativeTemplate({ data }: { data: ResumeData }) {
               {data.experience.map((exp, index) => (
                 <View key={index} style={{ marginBottom: 15 }}>
                   <Text style={{ fontSize: 14, fontWeight: 'bold' }}>{exp.jobTitle}</Text>
-                  <Text style={{ fontSize: 12, color: '#6366f1', marginBottom: 3 }}>
+                  <Text style={styles.employerText}>
                     {exp.employer} | {exp.city}, {exp.country}
                   </Text>
                   <Text style={{ fontSize: 10, marginBottom: 5, fontStyle: 'italic' }}>
@@ -179,7 +198,7 @@ export function CreativeTemplate({ data }: { data: ResumeData }) {
               {data.education.map((edu, index) => (
                 <View key={index} style={{ marginBottom: 15 }}>
                   <Text style={{ fontSize: 14, fontWeight: 'bold' }}>{edu.degree}</Text>
-                  <Text style={{ fontSize: 12, color: '#6366f1', marginBottom: 3 }}>
+                  <Text style={styles.employerText}>
                     {edu.school} | {edu.city}, {edu.country}
                   </Text>
                   <Text style={{ fontSize: 10, marginBottom: 5, fontStyle: 'italic' }}>

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import { LandingPage } from './pages/LandingPage'
 import { ResumeBuilder } from './components/ResumeBuilder'
 import { Navbar } from './components/Navbar'
@@ -18,8 +18,14 @@ function App() {
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Navbar />
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/builder" element={
+          <Route path="/landing" element={<LandingPage />} />
+          <Route path="/" element={
+            <main className="flex-1 w-full">
+              <ResumeBuilder />
+            </main>
+          } />
+          {/* Redirect any other routes to the root */}
+          <Route path="*" element={
             <main className="flex-1 w-full">
               <ResumeBuilder />
             </main>

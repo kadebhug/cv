@@ -19,7 +19,7 @@ export function LandingPage() {
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link
-                to="/builder"
+                to="/"
                 className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 Get started
@@ -97,8 +97,8 @@ export function LandingPage() {
                     ))}
                   </ul>
                 </div>
-                <a
-                  href="#"
+                <Link
+                  to="/"
                   className={`mt-8 block rounded-md px-3.5 py-2 text-center text-sm font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
                     ${tier.featured 
                       ? 'bg-indigo-500 text-white shadow-sm hover:bg-indigo-400 focus-visible:outline-indigo-500'
@@ -106,7 +106,7 @@ export function LandingPage() {
                     }`}
                 >
                   Get started
-                </a>
+                </Link>
               </div>
             ))}
           </div>

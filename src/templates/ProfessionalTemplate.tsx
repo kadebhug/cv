@@ -1,66 +1,91 @@
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 import { ResumeData } from '../types/resume'
+import { ColorTheme } from '../components/ResumePreviewer'
 
-const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-    fontFamily: 'Helvetica',
-  },
-  header: {
-    backgroundColor: '#1a365d',
-    padding: 20,
-    color: 'white',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerContent: {
-    flex: 1,
-  },
-  photo: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginRight: 20,
-    border: '2px solid white',
-  },
-  name: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  jobTitle: {
-    fontSize: 14,
-    marginBottom: 10,
-  },
-  contact: {
-    fontSize: 10,
-    flexDirection: 'row',
-    gap: 15,
-    marginTop: 10,
-  },
-  content: {
-    padding: 20,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1a365d',
-    borderBottomWidth: 2,
-    borderBottomColor: '#1a365d',
-    paddingBottom: 5,
-    marginBottom: 10,
-  },
-  summary: {
-    fontSize: 11,
-    marginBottom: 20,
-    lineHeight: 1.5,
-  }
-})
+interface ProfessionalTemplateProps {
+  data: ResumeData;
+  colorTheme?: ColorTheme;
+}
 
-export function ProfessionalTemplate({ data }: { data: ResumeData }) {
+const defaultColorTheme: ColorTheme = {
+  id: 'blue',
+  name: 'Blue',
+  primary: '#3b82f6',
+  secondary: '#93c5fd',
+};
+
+export function ProfessionalTemplate({ data, colorTheme = defaultColorTheme }: ProfessionalTemplateProps) {
+  // Create dynamic styles with the color theme
+  const styles = StyleSheet.create({
+    page: {
+      padding: 30,
+      fontFamily: 'Helvetica',
+    },
+    header: {
+      backgroundColor: colorTheme.primary,
+      padding: 20,
+      color: 'white',
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    headerContent: {
+      flex: 1,
+    },
+    photo: {
+      width: 70,
+      height: 70,
+      borderRadius: 35,
+      marginRight: 20,
+      border: '2px solid white',
+    },
+    name: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      marginBottom: 5,
+    },
+    headerJobTitle: {
+      fontSize: 14,
+      marginBottom: 10,
+    },
+    contact: {
+      fontSize: 10,
+      flexDirection: 'row',
+      gap: 15,
+      marginTop: 10,
+    },
+    content: {
+      padding: 20,
+    },
+    section: {
+      marginBottom: 20,
+    },
+    sectionTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: colorTheme.primary,
+      borderBottomWidth: 2,
+      borderBottomColor: colorTheme.primary,
+      paddingBottom: 5,
+      marginBottom: 10,
+    },
+    summary: {
+      fontSize: 11,
+      marginBottom: 20,
+      lineHeight: 1.5,
+    },
+    jobTitle: {
+      fontSize: 12, 
+      fontWeight: 'bold', 
+      color: colorTheme.primary
+    },
+    skillBadge: {
+      backgroundColor: colorTheme.secondary,
+      padding: '3 8',
+      borderRadius: 4,
+      marginBottom: 5
+    }
+  });
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -73,7 +98,7 @@ export function ProfessionalTemplate({ data }: { data: ResumeData }) {
           )}
           <View style={styles.headerContent}>
             <Text style={styles.name}>{`${data.personal?.firstName || ''} ${data.personal?.lastName || ''}`}</Text>
-            <Text style={styles.jobTitle}>{data.personal?.jobTitle || ''}</Text>
+            <Text style={styles.headerJobTitle}>{data.personal?.jobTitle || ''}</Text>
             <View style={styles.contact}>
               <Text>{data.personal?.email || ''}</Text>
               <Text>|</Text>
@@ -100,7 +125,7 @@ export function ProfessionalTemplate({ data }: { data: ResumeData }) {
               {data.experience.map((exp, index) => (
                 <View key={index} style={{ marginBottom: 15 }}>
                   <Text style={{ fontSize: 14, fontWeight: 'bold' }}>{exp.employer}</Text>
-                  <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#1a365d' }}>
+                  <Text style={styles.jobTitle}>
                     {exp.jobTitle}
                   </Text>
                   <Text style={{ fontSize: 10, marginBottom: 5 }}>
@@ -119,7 +144,7 @@ export function ProfessionalTemplate({ data }: { data: ResumeData }) {
               {data.education.map((edu, index) => (
                 <View key={index} style={{ marginBottom: 10 }}>
                   <Text style={{ fontSize: 14, fontWeight: 'bold' }}>{edu.school}</Text>
-                  <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#1a365d' }}>
+                  <Text style={styles.jobTitle}>
                     {edu.degree}
                   </Text>
                   <Text style={{ fontSize: 10 }}>
@@ -141,12 +166,7 @@ export function ProfessionalTemplate({ data }: { data: ResumeData }) {
                 {data.skills.map((skill, index) => (
                   <View 
                     key={index} 
-                    style={{ 
-                      backgroundColor: '#e2e8f0', 
-                      padding: '3 8',
-                      borderRadius: 4,
-                      marginBottom: 5
-                    }}
+                    style={styles.skillBadge}
                   >
                     <Text style={{ fontSize: 10 }}>{skill.name}</Text>
                   </View>

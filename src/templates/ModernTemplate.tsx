@@ -1,52 +1,74 @@
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 import { ResumeData } from '../types/resume'
+import { ColorTheme } from '../components/ResumePreviewer'
 
-const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-    fontFamily: 'Helvetica',
-  },
-  header: {
-    marginBottom: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerContent: {
-    flex: 1,
-  },
-  photo: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 15,
-    border: '1px solid #e5e7eb',
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  contact: {
-    fontSize: 10,
-    color: '#666',
-    flexDirection: 'row',
-    gap: 10,
-  },
-  section: {
-    marginTop: 15,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingBottom: 3,
-  },
-})
+interface ModernTemplateProps {
+  data: ResumeData;
+  colorTheme?: ColorTheme;
+}
 
-export function ModernTemplate({ data }: { data: ResumeData }) {
+const defaultColorTheme: ColorTheme = {
+  id: 'blue',
+  name: 'Blue',
+  primary: '#3b82f6',
+  secondary: '#93c5fd',
+};
+
+export function ModernTemplate({ data, colorTheme = defaultColorTheme }: ModernTemplateProps) {
+  // Create dynamic styles with the color theme
+  const styles = StyleSheet.create({
+    page: {
+      padding: 30,
+      fontFamily: 'Helvetica',
+    },
+    header: {
+      marginBottom: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    headerContent: {
+      flex: 1,
+    },
+    photo: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      marginRight: 15,
+      border: `1px solid ${colorTheme.secondary}`,
+    },
+    name: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 5,
+      color: colorTheme.primary,
+    },
+    contact: {
+      fontSize: 10,
+      color: '#666',
+      flexDirection: 'row',
+      gap: 10,
+    },
+    section: {
+      marginTop: 15,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: 'bold',
+      marginBottom: 10,
+      color: colorTheme.primary,
+      borderBottomWidth: 1,
+      borderBottomColor: colorTheme.secondary,
+      paddingBottom: 3,
+    },
+    skillBadge: {
+      backgroundColor: colorTheme.secondary,
+      padding: '3 8',
+      borderRadius: 4,
+      marginBottom: 5,
+      marginRight: 5
+    }
+  });
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -120,13 +142,7 @@ export function ModernTemplate({ data }: { data: ResumeData }) {
               {data.skills.map((skill, index) => (
                 <View 
                   key={index} 
-                  style={{ 
-                    backgroundColor: '#f3f4f6', 
-                    padding: '3 8',
-                    borderRadius: 4,
-                    marginBottom: 5,
-                    marginRight: 5
-                  }}
+                  style={styles.skillBadge}
                 >
                   <Text style={{ fontSize: 10 }}>{skill.name}</Text>
                 </View>
