@@ -2,6 +2,8 @@ import { PDFViewer } from '@react-pdf/renderer'
 import { ModernTemplate } from '../templates/ModernTemplate'
 import { ProfessionalTemplate } from '../templates/ProfessionalTemplate'
 import { CreativeTemplate } from '../templates/CreativeTemplate'
+import { ExecutiveTemplate } from '../templates/ExecutiveTemplate'
+import { MinimalistTemplate } from '../templates/MinimalistTemplate'
 import { ResumeData, Skill } from '../types/resume'
 import { mergeWithSampleData } from '../utils/resumeUtils'
 import { useState, useEffect } from 'react'
@@ -31,6 +33,8 @@ const TemplateComponents = {
   modern: ModernTemplate,
   professional: ProfessionalTemplate,
   creative: CreativeTemplate,
+  executive: ExecutiveTemplate,
+  minimalist: MinimalistTemplate,
 } as const;
 
 export function ResumePreviewer({ data, templateId, colorTheme = defaultColorTheme }: ResumePreviewerProps) {
