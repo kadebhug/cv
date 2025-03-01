@@ -50,6 +50,31 @@ export interface Course {
   description?: string
 }
 
+export interface Certification {
+  name: string
+  issuer: string
+  date?: string
+  url?: string
+}
+
+export interface Project {
+  name: string
+  description: string
+  url?: string
+  startDate?: string
+  endDate?: string
+  current?: boolean
+}
+
+export interface Organization {
+  name: string
+  role: string
+  startDate?: string
+  endDate?: string
+  current?: boolean
+  description?: string
+}
+
 export interface CustomSection {
   title: string
   items: Array<{
@@ -69,5 +94,8 @@ export interface ResumeData {
   skills: Skill[]
   courses?: Course[]
   hobbies?: string[]
+  certifications?: Certification[]
+  projects?: Project[]
+  organizations?: Organization[]
   customSections?: CustomSection[]
 } 

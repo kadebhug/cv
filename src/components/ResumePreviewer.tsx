@@ -4,6 +4,8 @@ import { ProfessionalTemplate } from '../templates/ProfessionalTemplate'
 import { CreativeTemplate } from '../templates/CreativeTemplate'
 import { ExecutiveTemplate } from '../templates/ExecutiveTemplate'
 import { MinimalistTemplate } from '../templates/MinimalistTemplate'
+import { TechTemplate } from '../templates/TechTemplate'
+import { AcademicTemplate } from '../templates/AcademicTemplate'
 import { ResumeData, Skill } from '../types/resume'
 import { mergeWithSampleData } from '../utils/resumeUtils'
 import { useState, useEffect } from 'react'
@@ -35,6 +37,13 @@ const TemplateComponents = {
   creative: CreativeTemplate,
   executive: ExecutiveTemplate,
   minimalist: MinimalistTemplate,
+  tech: TechTemplate,
+  academic: AcademicTemplate,
+  medical: ProfessionalTemplate,
+  legal: ExecutiveTemplate,
+  engineering: TechTemplate,
+  finance: ExecutiveTemplate,
+  sales: ModernTemplate,
 } as const;
 
 export function ResumePreviewer({ data, templateId, colorTheme = defaultColorTheme }: ResumePreviewerProps) {
@@ -166,7 +175,7 @@ export function ResumePreviewer({ data, templateId, colorTheme = defaultColorThe
     } else if (isMobile) {
       return 'h-[500px]';
     } else {
-      return 'h-full min-h-[700px]';
+      return 'h-[calc(100vh-200px)] min-h-[800px]';
     }
   };
 
