@@ -5,12 +5,14 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { resumeSchema } from '../schemas/resumeSchemas'
 import { ResumeData } from '../types/resume'
-import { FaUser, FaFileAlt, FaBriefcase, FaGraduationCap, FaTools, FaLink, FaPuzzlePiece, FaHeart, FaChevronLeft, FaChevronRight, FaBars, FaTimes, FaPalette, FaCheck, FaRobot, FaLightbulb, FaLayerGroup, FaEdit, FaLinkedin } from 'react-icons/fa'
+import { FaUser, FaFileAlt, FaBriefcase, FaGraduationCap, FaTools, FaLink, FaPuzzlePiece, FaHeart, FaChevronLeft, FaChevronRight, FaBars, FaTimes, FaPalette, FaCheck, FaRobot, FaLightbulb, FaLayerGroup, FaEdit, FaLinkedin, FaSave } from 'react-icons/fa'
 import { ResumeFeedback } from './ResumeFeedback'
 import { ATSOptimizer } from './ATSOptimizer'
 import { TemplateSelector } from './TemplateSelector'
 import { JobSearch } from './JobSearch'
 import { LinkedInImport } from './LinkedInImport'
+import { SaveResumeModal } from './SaveResumeModal'
+import { PDFViewer } from './PDFViewer'
 
 const sections = [
   { id: 'personal', title: 'Personal Details', icon: FaUser, description: 'Basic information about you' },
@@ -126,19 +128,36 @@ const templateCategories = [
 ];
 
 // Available color themes
-const colorThemes: ColorTheme[] = [
-  { id: 'blue', name: 'Blue', primary: '#3b82f6', secondary: '#93c5fd' },
-  { id: 'green', name: 'Green', primary: '#10b981', secondary: '#a7f3d0' },
-  { id: 'purple', name: 'Purple', primary: '#8b5cf6', secondary: '#c4b5fd' },
-  { id: 'red', name: 'Red', primary: '#ef4444', secondary: '#fca5a5' },
-  { id: 'amber', name: 'Amber', primary: '#f59e0b', secondary: '#fcd34d' },
-  { id: 'gray', name: 'Gray', primary: '#4b5563', secondary: '#d1d5db' },
+const colorThemes = [
+  { id: 'blue', name: 'Blue', theme: { primary: '#3b82f6', secondary: '#93c5fd', background: '#ffffff', text: '#1e293b' } },
+  { id: 'green', name: 'Green', theme: { primary: '#10b981', secondary: '#a7f3d0', background: '#ffffff', text: '#1e293b' } },
+  { id: 'purple', name: 'Purple', theme: { primary: '#8b5cf6', secondary: '#c4b5fd', background: '#ffffff', text: '#1e293b' } },
+  { id: 'red', name: 'Red', theme: { primary: '#ef4444', secondary: '#fca5a5', background: '#ffffff', text: '#1e293b' } },
+  { id: 'amber', name: 'Amber', theme: { primary: '#f59e0b', secondary: '#fcd34d', background: '#ffffff', text: '#1e293b' } },
+  { id: 'gray', name: 'Gray', theme: { primary: '#4b5563', secondary: '#d1d5db', background: '#ffffff', text: '#1e293b' } },
 ];
 
-export function ResumeBuilder() {
+interface ResumeBuilderProps {
+  initialData?: Partial<ResumeData>;
+  initialTemplate?: string;
+  initialColorTheme?: string;
+  existingResumeId?: string;
+  existingResumeName?: string;
+}
+
+export function ResumeBuilder({
+  initialData,
+  initialTemplate = 'modern',
+  initialColorTheme = 'blue',
+  existingResumeId,
+  existingResumeName
+}: ResumeBuilderProps = {}) {
   const [activeSection, setActiveSection] = useState<string>('personal')
-  const [selectedTemplate, setSelectedTemplate] = useState('modern')
-  const [selectedColorTheme, setSelectedColorTheme] = useState<ColorTheme>(colorThemes[0])
+  const [selectedTemplate, setSelectedTemplate] = useState(initialTemplate)
+  const [selectedColorTheme, setSelectedColorTheme] = useState<ColorTheme>(
+    colorThemes.find(theme => theme.id === 'blue')?.theme || 
+    { primary: '#3b82f6', secondary: '#93c5fd', background: '#ffffff', text: '#1e293b' }
+  )
   const [isChangingTemplate, setIsChangingTemplate] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [sidebarVisible, setSidebarVisible] = useState(false)
@@ -147,60 +166,60 @@ export function ResumeBuilder() {
   const [feedbackTab, setFeedbackTab] = useState<'feedback' | 'ats'>('feedback');
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [jobTab, setJobTab] = useState<'search' | 'import'>('search');
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'template' | 'pdf'>('template');
   
-  // Initialize with empty values that match the ResumeData structure
-  const [formData, setFormData] = useState<Partial<ResumeData>>({
+  // Initialize with empty values or provided initialData
+  const [formData, setFormData] = useState<Partial<ResumeData>>(initialData || {
     personal: {
-      jobTitle: '',
       firstName: '',
       lastName: '',
       email: '',
       phone: '',
-      country: '',
-      city: '',
       address: '',
-      postalCode: '',
-      photo: undefined
+      city: '',
+      state: '',
+      zipCode: '',
+      country: '',
+      jobTitle: '',
+      website: '',
+      summary: ''
     },
     professionalSummary: '',
     experience: [],
     education: [],
     skills: [],
     socialLinks: [],
-    courses: [],
-    hobbies: [],
     certifications: [],
-    projects: [],
-    organizations: [],
-    customSections: []
+    languages: [],
+    hobbies: []
   })
   
   const methods = useForm<ResumeData>({
     resolver: zodResolver(resumeSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       personal: {
-        jobTitle: '',
         firstName: '',
         lastName: '',
         email: '',
         phone: '',
-        country: '',
-        city: '',
         address: '',
-        postalCode: '',
-        photo: undefined
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
+        jobTitle: '',
+        website: '',
+        summary: ''
       },
       professionalSummary: '',
       experience: [],
       education: [],
       skills: [],
       socialLinks: [],
-      courses: [],
-      hobbies: [],
       certifications: [],
-      projects: [],
-      organizations: [],
-      customSections: []
+      languages: [],
+      hobbies: []
     },
   })
   
@@ -229,8 +248,11 @@ export function ResumeBuilder() {
   }, []);
 
   // Handle color theme selection
-  const handleColorThemeChange = (theme: ColorTheme) => {
-    setSelectedColorTheme(theme);
+  const handleColorThemeChange = (themeId: string) => {
+    const theme = colorThemes.find(theme => theme.id === themeId);
+    if (theme) {
+      setSelectedColorTheme(theme.theme);
+    }
   };
 
   // Toggle sidebar collapse
@@ -298,6 +320,14 @@ export function ResumeBuilder() {
     
     // Update form with merged data
     methods.reset(mergedData as ResumeData);
+  };
+
+  // Find the current color theme ID
+  const getCurrentColorThemeId = () => {
+    const foundTheme = colorThemes.find(theme => 
+      JSON.stringify(theme.theme) === JSON.stringify(selectedColorTheme)
+    );
+    return foundTheme?.id || 'blue';
   };
 
   return (
@@ -443,30 +473,29 @@ export function ResumeBuilder() {
               {/* Color Theme Selection */}
               <div className="mt-8">
                 {(!sidebarCollapsed || isMobile) && (
-                  <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center">
-                    <FaPalette className="mr-1" size={14} />
-                    Color Theme
-                  </h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-medium">Color Theme</h3>
+                    <div className="flex space-x-2">
+                      {colorThemes.map((theme) => (
+                        <button
+                          key={theme.id}
+                          onClick={() => handleColorThemeChange(theme.id)}
+                          className={`relative rounded-full w-8 h-8 flex items-center justify-center border-2 ${
+                            JSON.stringify(selectedColorTheme) === JSON.stringify(theme.theme)
+                              ? 'border-gray-800'
+                              : 'border-transparent hover:border-gray-300'
+                          }`}
+                          style={{ backgroundColor: theme.theme.primary }}
+                          title={theme.name}
+                        >
+                          {JSON.stringify(selectedColorTheme) === JSON.stringify(theme.theme) && (
+                            <FaCheck className="text-white text-xs" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                <div className={`${isMobile ? 'grid grid-cols-3 gap-2' : 'flex flex-wrap gap-2'}`}>
-                  {colorThemes.map(theme => (
-                    <button
-                      key={theme.id}
-                      onClick={() => handleColorThemeChange(theme)}
-                      className={`relative rounded-full w-8 h-8 flex items-center justify-center border-2 ${
-                        selectedColorTheme.id === theme.id
-                          ? 'border-gray-800'
-                          : 'border-transparent hover:border-gray-300'
-                      }`}
-                      style={{ backgroundColor: theme.primary }}
-                      title={theme.name}
-                    >
-                      {selectedColorTheme.id === theme.id && (
-                        <FaCheck className="text-white text-xs" />
-                      )}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
@@ -525,143 +554,73 @@ export function ResumeBuilder() {
                         </div>
                       </div>
                     ) : activeSection === 'feedback' ? (
-                      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-                        <div className="flex border-b">
-                          <button
-                            className={`flex-1 py-3 px-4 text-center font-medium ${
-                              feedbackTab === 'feedback'
-                                ? 'text-blue-600 border-b-2 border-blue-600'
-                                : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                            onClick={() => setFeedbackTab('feedback')}
-                          >
-                            <FaLightbulb className="inline-block mr-2" />
-                            Resume Feedback
-                          </button>
-                          <button
-                            className={`flex-1 py-3 px-4 text-center font-medium ${
-                              feedbackTab === 'ats'
-                                ? 'text-blue-600 border-b-2 border-blue-600'
-                                : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                            onClick={() => setFeedbackTab('ats')}
-                          >
-                            <FaRobot className="inline-block mr-2" />
-                            ATS Optimization
-                          </button>
+                      <div className="bg-white shadow-sm rounded-lg p-6">
+                        <div className="mb-4">
+                          <h2 className="text-xl font-semibold text-gray-800">Resume Feedback</h2>
+                          <div className="flex space-x-2 mt-2">
+                            <button
+                              onClick={() => setFeedbackTab('feedback')}
+                              className={`px-3 py-1 text-sm rounded-md ${
+                                feedbackTab === 'feedback'
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              General Feedback
+                            </button>
+                            <button
+                              onClick={() => setFeedbackTab('ats')}
+                              className={`px-3 py-1 text-sm rounded-md ${
+                                feedbackTab === 'ats'
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              ATS Optimization
+                            </button>
+                          </div>
                         </div>
                         
                         {feedbackTab === 'feedback' ? (
-                          <ResumeFeedback resumeData={{
-                            personal: formData.personal || {
-                              jobTitle: '',
-                              firstName: '',
-                              lastName: '',
-                              email: '',
-                              phone: '',
-                              country: '',
-                              city: '',
-                              address: '',
-                              postalCode: ''
-                            },
-                            professionalSummary: formData.professionalSummary || '',
-                            experience: Array.isArray(formData.experience) ? formData.experience : [],
-                            education: Array.isArray(formData.education) ? formData.education : [],
-                            skills: Array.isArray(formData.skills) ? formData.skills : [],
-                            socialLinks: Array.isArray(formData.socialLinks) ? formData.socialLinks : [],
-                            courses: Array.isArray(formData.courses) ? formData.courses : [],
-                            hobbies: Array.isArray(formData.hobbies) ? formData.hobbies : [],
-                            certifications: Array.isArray(formData.certifications) ? formData.certifications : [],
-                            projects: Array.isArray(formData.projects) ? formData.projects : [],
-                            organizations: Array.isArray(formData.organizations) ? formData.organizations : [],
-                            customSections: Array.isArray(formData.customSections) ? formData.customSections : []
-                          }} />
+                          <ResumeFeedback resumeData={formData as ResumeData} />
                         ) : (
                           <ATSOptimizer 
-                            resumeData={{
-                              personal: formData.personal || {
-                                jobTitle: '',
-                                firstName: '',
-                                lastName: '',
-                                email: '',
-                                phone: '',
-                                country: '',
-                                city: '',
-                                address: '',
-                                postalCode: ''
-                              },
-                              professionalSummary: formData.professionalSummary || '',
-                              experience: Array.isArray(formData.experience) ? formData.experience : [],
-                              education: Array.isArray(formData.education) ? formData.education : [],
-                              skills: Array.isArray(formData.skills) ? formData.skills : [],
-                              socialLinks: Array.isArray(formData.socialLinks) ? formData.socialLinks : [],
-                              courses: Array.isArray(formData.courses) ? formData.courses : [],
-                              hobbies: Array.isArray(formData.hobbies) ? formData.hobbies : [],
-                              certifications: Array.isArray(formData.certifications) ? formData.certifications : [],
-                              projects: Array.isArray(formData.projects) ? formData.projects : [],
-                              organizations: Array.isArray(formData.organizations) ? formData.organizations : [],
-                              customSections: Array.isArray(formData.customSections) ? formData.customSections : []
-                            }}
+                            resumeData={formData as ResumeData} 
                             jobDescription={jobDescription}
                             onJobDescriptionChange={setJobDescription}
                           />
                         )}
                       </div>
                     ) : (
-                      // Job Search Section
-                      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-                        <div className="flex border-b">
-                          <button
-                            className={`flex-1 py-3 px-4 text-center font-medium ${
-                              jobTab === 'search'
-                                ? 'text-blue-600 border-b-2 border-blue-600'
-                                : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                            onClick={() => setJobTab('search')}
-                          >
-                            <FaBriefcase className="inline-block mr-2" />
-                            Job Search
-                          </button>
-                          <button
-                            className={`flex-1 py-3 px-4 text-center font-medium ${
-                              jobTab === 'import'
-                                ? 'text-blue-600 border-b-2 border-blue-600'
-                                : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                            onClick={() => setJobTab('import')}
-                          >
-                            <FaLinkedin className="inline-block mr-2" />
-                            LinkedIn Import
-                          </button>
+                      <div className="bg-white shadow-sm rounded-lg p-6">
+                        <div className="mb-4">
+                          <h2 className="text-xl font-semibold text-gray-800">Job Search</h2>
+                          <div className="flex space-x-2 mt-2">
+                            <button
+                              onClick={() => setJobTab('search')}
+                              className={`px-3 py-1 text-sm rounded-md ${
+                                jobTab === 'search'
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              Search Jobs
+                            </button>
+                            <button
+                              onClick={() => setJobTab('import')}
+                              className={`px-3 py-1 text-sm rounded-md ${
+                                jobTab === 'import'
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              Import from LinkedIn
+                            </button>
+                          </div>
                         </div>
                         
                         {jobTab === 'search' ? (
-                          <JobSearch 
-                            resumeData={{
-                              personal: formData.personal || {
-                                jobTitle: '',
-                                firstName: '',
-                                lastName: '',
-                                email: '',
-                                phone: '',
-                                country: '',
-                                city: '',
-                                address: '',
-                                postalCode: ''
-                              },
-                              professionalSummary: formData.professionalSummary || '',
-                              experience: Array.isArray(formData.experience) ? formData.experience : [],
-                              education: Array.isArray(formData.education) ? formData.education : [],
-                              skills: Array.isArray(formData.skills) ? formData.skills : [],
-                              socialLinks: Array.isArray(formData.socialLinks) ? formData.socialLinks : [],
-                              courses: Array.isArray(formData.courses) ? formData.courses : [],
-                              hobbies: Array.isArray(formData.hobbies) ? formData.hobbies : [],
-                              certifications: Array.isArray(formData.certifications) ? formData.certifications : [],
-                              projects: Array.isArray(formData.projects) ? formData.projects : [],
-                              organizations: Array.isArray(formData.organizations) ? formData.organizations : [],
-                              customSections: Array.isArray(formData.customSections) ? formData.customSections : []
-                            }}
-                          />
+                          <JobSearch resumeData={formData as ResumeData} />
                         ) : (
                           <LinkedInImport onImportComplete={handleLinkedInImport} />
                         )}
@@ -670,14 +629,62 @@ export function ResumeBuilder() {
                   </FormProvider>
                 </div>
 
-                {/* Preview Section */}
+                {/* Resume Preview */}
                 <div className="lg:sticky lg:top-8 h-auto min-h-screen space-y-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold text-gray-800">Resume Preview</h2>
+                    <div className="flex space-x-2">
+                      <div className="inline-flex rounded-md shadow-sm" role="group">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewMode('template')}
+                          className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
+                            previewMode === 'template'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-white text-gray-700 hover:bg-gray-50'
+                          } border border-gray-200`}
+                        >
+                          Template
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPreviewMode('pdf')}
+                          className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
+                            previewMode === 'pdf'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-white text-gray-700 hover:bg-gray-50'
+                          } border border-gray-200`}
+                        >
+                          PDF
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => setShowSaveModal(true)}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <FaSave className="mr-2" />
+                        Save Resume
+                      </button>
+                    </div>
+                  </div>
                   <div className={`transition-opacity duration-300 ${isChangingTemplate ? 'opacity-0' : 'opacity-100'}`}>
-                    <ResumePreviewer 
-                      data={formData as ResumeData} 
-                      templateId={selectedTemplate}
-                      colorTheme={selectedColorTheme}
-                    />
+                    {previewMode === 'template' ? (
+                      <ResumePreviewer 
+                        resumeData={formData as ResumeData} 
+                        templateId={selectedTemplate}
+                        colorTheme={selectedColorTheme}
+                      />
+                    ) : (
+                      <div className="bg-white shadow-lg rounded-lg p-6 max-w-4xl mx-auto">
+                        <PDFViewer
+                          resumeData={formData as ResumeData}
+                          templateId={selectedTemplate}
+                          colorTheme={selectedColorTheme}
+                          height="600px"
+                          showToolbar={false}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -685,6 +692,19 @@ export function ResumeBuilder() {
           </div>
         </div>
       </div>
+      
+      {/* Save Resume Modal */}
+      {showSaveModal && (
+        <SaveResumeModal
+          isOpen={showSaveModal}
+          onClose={() => setShowSaveModal(false)}
+          resumeData={formData as ResumeData}
+          templateId={selectedTemplate}
+          colorThemeId={getCurrentColorThemeId()}
+          existingResumeId={existingResumeId}
+          existingResumeName={existingResumeName}
+        />
+      )}
     </div>
   )
 } 
