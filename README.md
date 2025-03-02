@@ -73,7 +73,27 @@ yarn dev
 - Zod (for form validation)
 - React PDF (for PDF generation)
 - Tailwind CSS (for styling)
+- Firebase (for authentication, database, and storage)
 
-## License
+## Firebase Setup
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project uses Firebase for authentication, database, and storage. To set up Firebase:
+
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Register a new web app in your Firebase project
+3. Enable the services you need (Authentication, Firestore, Storage)
+4. Copy your Firebase configuration from the Firebase Console
+5. Create a `.env` file in the root directory based on the `.env.example` template
+6. Fill in your Firebase configuration values in the `.env` file
+
+Example:
+```bash
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
+VITE_FIREBASE_MEASUREMENT_ID=your-measurement-id
+```
+
