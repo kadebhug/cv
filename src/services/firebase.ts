@@ -1,7 +1,7 @@
 // Firebase configuration
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 // Your web app's Firebase configuration
@@ -16,12 +16,45 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
+// Check if Firebase config is valid
+const isFirebaseConfigValid = () => {
+  const requiredFields = [
+    'apiKey', 'authDomain', 'projectId', 'storageBucket', 
+    'messagingSenderId', 'appId'
+  ];
+  
+  const missingFields = requiredFields.filter(field => 
+    !firebaseConfig[field as keyof typeof firebaseConfig]
+  );
+  
+  if (missingFields.length > 0) {
+    console.error(`Missing Firebase configuration fields: ${missingFields.join(', ')}`);
+    return false;
+  }
+  
+  return true;
+};
+
 // Initialize Firebase
+console.log('Initializing Firebase with config:', {
+  ...firebaseConfig,
+  apiKey: firebaseConfig.apiKey ? '***' : undefined // Hide API key in logs
+});
+
+if (!isFirebaseConfigValid()) {
+  console.error('Invalid Firebase configuration. Check your .env file.');
+}
+
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase services
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+
+// Use emulators in development if needed
+// if (import.meta.env.DEV) {
+//   connectFirestoreEmulator(db, 'localhost', 8080);
+// }
 
 export { app, auth, db, storage }; 

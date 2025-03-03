@@ -122,14 +122,25 @@ import {
     constraints: QueryConstraint[] = []
   ): Promise<T[]> => {
     try {
+      console.log(`Querying ${collectionName} with constraints:`, constraints);
       const collectionRef = collection(db, collectionName);
       const q = query(collectionRef, ...constraints);
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as T[];
+      console.log(`Query returned ${querySnapshot.docs.length} documents`);
+      
+      const results: T[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        console.log(`Document ID: ${doc.id}`);
+        const data = {
+          id: doc.id,
+          ...doc.data()
+        } as T;
+        results.push(data);
+      });
+      
+      return results;
     } catch (error) {
       console.error(`Error querying documents from ${collectionName}:`, error);
       throw error;

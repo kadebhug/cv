@@ -3,6 +3,11 @@ import { LandingPage } from './pages/LandingPage'
 import { ResumeBuilder } from './components/ResumeBuilder'
 import { Navbar } from './components/Navbar'
 import { Font } from '@react-pdf/renderer'
+import { AuthProvider } from './contexts/AuthContext'
+import { LoginPage } from './pages/LoginPage'
+import { RegisterPage } from './pages/RegisterPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
+import { DashboardPage } from './pages/DashboardPage'
 
 // Register a web-safe font
 Font.register({
@@ -14,25 +19,36 @@ Font.register({
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-100 flex flex-col">
-        <Navbar />
-        <Routes>
-          <Route path="/landing" element={<LandingPage />} />
-          <Route path="/" element={
-            <main className="flex-1 w-full">
-              <ResumeBuilder />
-            </main>
-          } />
-          {/* Redirect any other routes to the root */}
-          <Route path="*" element={
-            <main className="flex-1 w-full">
-              <ResumeBuilder />
-            </main>
-          } />
-        </Routes>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-100 flex flex-col">
+          <Navbar />
+          <Routes>
+            <Route path="/landing" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/edit/:resumeId" element={
+              <main className="flex-1 w-full">
+                <ResumeBuilder />
+              </main>
+            } />
+            <Route path="/" element={
+              <main className="flex-1 w-full">
+                <ResumeBuilder />
+              </main>
+            } />
+            {/* Redirect any other routes to the root */}
+            <Route path="*" element={
+              <main className="flex-1 w-full">
+                <ResumeBuilder />
+              </main>
+            } />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

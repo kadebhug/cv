@@ -11,6 +11,9 @@ import { ATSOptimizer } from './ATSOptimizer'
 import { TemplateSelector } from './TemplateSelector'
 import { JobSearch } from './JobSearch'
 import { LinkedInImport } from './LinkedInImport'
+import { useAuth } from '../contexts/AuthContext'
+import { saveResume, updateResume, getResume } from '../services/resumeService'
+import { useParams, useNavigate } from 'react-router-dom'
 
 const sections = [
   { id: 'personal', title: 'Personal Details', icon: FaUser, description: 'Basic information about you' },
@@ -136,6 +139,12 @@ const colorThemes: ColorTheme[] = [
 ];
 
 export function ResumeBuilder() {
+  const { resumeId } = useParams();
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [activeSection, setActiveSection] = useState<string>('personal')
   const [selectedTemplate, setSelectedTemplate] = useState('modern')
   const [selectedColorTheme, setSelectedColorTheme] = useState<ColorTheme>(colorThemes[0])
@@ -298,6 +307,77 @@ export function ResumeBuilder() {
     
     // Update form with merged data
     methods.reset(mergedData as ResumeData);
+  };
+
+  // Load resume if editing an existing one
+  useEffect(() => {
+    const loadResume = async () => {
+      if (resumeId) {
+        try {
+          const resumeData = await getResume(resumeId);
+          if (resumeData) {
+            // Check if the resume belongs to the current user
+            if (currentUser && resumeData.userId === currentUser.uid) {
+              methods.reset(resumeData);
+            } else {
+              // Redirect if the resume doesn't belong to the user
+              navigate('/dashboard');
+            }
+          }
+        } catch (error) {
+          console.error('Error loading resume:', error);
+        }
+      }
+    };
+
+    if (resumeId) {
+      loadResume();
+    }
+  }, [resumeId, currentUser, navigate, methods]);
+
+  // Save resume to user's account
+  const handleSaveResume = async () => {
+    if (!currentUser) {
+      // Redirect to login if not authenticated
+      navigate('/login');
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveSuccess(false);
+    setSaveError('');
+
+    try {
+      const formData = methods.getValues();
+      
+      // Add user ID to the resume data
+      const resumeData = {
+        ...formData,
+        userId: currentUser.uid,
+      };
+
+      if (resumeId) {
+        // Update existing resume
+        await updateResume(resumeId, resumeData);
+      } else {
+        // Save new resume
+        const newResumeId = await saveResume(resumeData);
+        // Navigate to edit page with the new ID
+        navigate(`/edit/${newResumeId}`);
+      }
+
+      setSaveSuccess(true);
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Error saving resume:', error);
+      setSaveError('Failed to save resume. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -467,6 +547,29 @@ export function ResumeBuilder() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Add save button */}
+              <div className="p-4 border-t border-gray-200">
+                <button
+                  onClick={handleSaveResume}
+                  disabled={isSaving}
+                  className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                >
+                  {isSaving ? 'Saving...' : resumeId ? 'Update Resume' : 'Save Resume'}
+                </button>
+                
+                {saveSuccess && (
+                  <div className="mt-2 text-sm text-green-600 text-center">
+                    Resume saved successfully!
+                  </div>
+                )}
+                
+                {saveError && (
+                  <div className="mt-2 text-sm text-red-600 text-center">
+                    {saveError}
+                  </div>
+                )}
               </div>
             </div>
           </div>
