@@ -66,7 +66,7 @@ export function PersonalSection() {
             />
           </div>
           {errors.personal?.jobTitle && (
-            <p className={errorClass}>{errors.personal.jobTitle.message}</p>
+            <p className={errorClass}>{errors.personal.jobTitle.message as string}</p>
           )}
         </div>
 
@@ -79,7 +79,7 @@ export function PersonalSection() {
             className={inputClass}
           />
           {errors.personal?.firstName && (
-            <p className={errorClass}>{errors.personal.firstName.message}</p>
+            <p className={errorClass}>{errors.personal.firstName.message as string}</p>
           )}
         </div>
 
@@ -92,7 +92,7 @@ export function PersonalSection() {
             className={inputClass}
           />
           {errors.personal?.lastName && (
-            <p className={errorClass}>{errors.personal.lastName.message}</p>
+            <p className={errorClass}>{errors.personal.lastName.message as string}</p>
           )}
         </div>
 
@@ -108,7 +108,7 @@ export function PersonalSection() {
             />
           </div>
           {errors.personal?.email && (
-            <p className={errorClass}>{errors.personal.email.message}</p>
+            <p className={errorClass}>{errors.personal.email.message as string}</p>
           )}
         </div>
 
@@ -124,7 +124,7 @@ export function PersonalSection() {
             />
           </div>
           {errors.personal?.phone && (
-            <p className={errorClass}>{errors.personal.phone.message}</p>
+            <p className={errorClass}>{errors.personal.phone.message as string}</p>
           )}
         </div>
 
@@ -140,7 +140,7 @@ export function PersonalSection() {
             />
           </div>
           {errors.personal?.country && (
-            <p className={errorClass}>{errors.personal.country.message}</p>
+            <p className={errorClass}>{errors.personal.country.message as string}</p>
           )}
         </div>
 
@@ -156,7 +156,7 @@ export function PersonalSection() {
             />
           </div>
           {errors.personal?.city && (
-            <p className={errorClass}>{errors.personal.city.message}</p>
+            <p className={errorClass}>{errors.personal.city.message as string}</p>
           )}
         </div>
 
@@ -172,7 +172,7 @@ export function PersonalSection() {
             />
           </div>
           {errors.personal?.address && (
-            <p className={errorClass}>{errors.personal.address.message}</p>
+            <p className={errorClass}>{errors.personal.address.message as string}</p>
           )}
         </div>
 
@@ -188,7 +188,7 @@ export function PersonalSection() {
             />
           </div>
           {errors.personal?.postalCode && (
-            <p className={errorClass}>{errors.personal.postalCode.message}</p>
+            <p className={errorClass}>{errors.personal.postalCode.message as string}</p>
           )}
         </div>
       </div>

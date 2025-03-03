@@ -7,7 +7,6 @@ export function ExperienceSection() {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'experience',
-    shouldUnregister: true
   })
 
   // Common styling classes

@@ -29,6 +29,7 @@ interface ResumePreviewerProps {
   data: ResumeData
   templateId: string
   colorTheme?: ColorTheme
+  showSampleData?: boolean
 }
 
 const TemplateComponents = {
@@ -46,8 +47,13 @@ const TemplateComponents = {
   sales: ModernTemplate,
 } as const;
 
-export function ResumePreviewer({ data, templateId, colorTheme = defaultColorTheme }: ResumePreviewerProps) {
-  const [showPlaceholders, setShowPlaceholders] = useState(true);
+export function ResumePreviewer({ 
+  data, 
+  templateId, 
+  colorTheme = defaultColorTheme,
+  showSampleData = false
+}: ResumePreviewerProps) {
+  const [showPlaceholders, setShowPlaceholders] = useState(showSampleData);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentTemplateId, setCurrentTemplateId] = useState(templateId);
@@ -81,6 +87,11 @@ export function ResumePreviewer({ data, templateId, colorTheme = defaultColorThe
       return () => clearTimeout(timer);
     }
   }, [templateId, currentTemplateId]);
+
+  // Update showPlaceholders when showSampleData prop changes
+  useEffect(() => {
+    setShowPlaceholders(showSampleData);
+  }, [showSampleData]);
 
   // Safely get the template component
   const getTemplateComponent = () => {
@@ -137,6 +148,17 @@ export function ResumePreviewer({ data, templateId, colorTheme = defaultColorThe
       setError('Failed to process resume data');
       return inputData;
     }
+  };
+
+  // Check if the data is mostly empty
+  const isDataMostlyEmpty = () => {
+    const hasExperience = Array.isArray(data.experience) && data.experience.length > 0;
+    const hasEducation = Array.isArray(data.education) && data.education.length > 0;
+    const hasSkills = Array.isArray(data.skills) && data.skills.length > 0;
+    const hasSummary = data.professionalSummary && data.professionalSummary.trim() !== '';
+    
+    // If most sections are empty, suggest showing sample data
+    return !hasExperience && !hasEducation && !hasSkills && !hasSummary;
   };
 
   // Merge user data with sample data if showPlaceholders is true and normalize it
@@ -228,6 +250,12 @@ export function ResumePreviewer({ data, templateId, colorTheme = defaultColorThe
             Show sample data
           </span>
         </label>
+        
+        {isDataMostlyEmpty() && !showPlaceholders && (
+          <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
+            Your resume is mostly empty. Toggle sample data to see how it will look when complete.
+          </div>
+        )}
       </div>
       
       <div className={`${getViewerHeight()} ${isMobileView ? 'max-w-[375px] mx-auto' : 'w-full'} flex-grow`}>

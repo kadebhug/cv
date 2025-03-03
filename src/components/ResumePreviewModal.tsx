@@ -20,6 +20,10 @@ export function ResumePreviewModal({ resumeId, onClose }: ResumePreviewModalProp
       try {
         setLoading(true);
         const data = await getResume(resumeId);
+        console.log('Resume data fetched in modal:', data);
+        console.log('Education:', data?.education);
+        console.log('Experience:', data?.experience);
+        console.log('Skills:', data?.skills);
         setResumeData(data);
       } catch (err) {
         console.error('Error fetching resume:', err);
@@ -80,6 +84,7 @@ export function ResumePreviewModal({ resumeId, onClose }: ResumePreviewModalProp
               data={resumeData} 
               templateId={resumeData.theme?.template || 'modern'} 
               colorTheme={defaultColorTheme}
+              showSampleData={false}
             />
           ) : (
             <div className="bg-yellow-50 p-4 rounded-lg">

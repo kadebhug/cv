@@ -181,7 +181,11 @@ export function ResumeBuilder() {
     certifications: [],
     projects: [],
     organizations: [],
-    customSections: []
+    customSections: [],
+    theme: {
+      template: 'modern',
+      color: 'blue'
+    }
   })
   
   const methods = useForm<ResumeData>({
@@ -209,7 +213,11 @@ export function ResumeBuilder() {
       certifications: [],
       projects: [],
       organizations: [],
-      customSections: []
+      customSections: [],
+      theme: {
+        template: 'modern',
+        color: 'blue'
+      }
     },
   })
   
@@ -350,11 +358,24 @@ export function ResumeBuilder() {
     try {
       const formData = methods.getValues();
       
-      // Add user ID to the resume data
+      // Ensure arrays are properly initialized
       const resumeData = {
         ...formData,
         userId: currentUser.uid,
+        experience: formData.experience || [],
+        education: formData.education || [],
+        skills: formData.skills || [],
+        socialLinks: formData.socialLinks || [],
+        theme: {
+          template: selectedTemplate,
+          color: selectedColorTheme.id
+        }
       };
+
+      console.log('Saving resume data:', resumeData);
+      console.log('Education:', resumeData.education);
+      console.log('Experience:', resumeData.experience);
+      console.log('Skills:', resumeData.skills);
 
       if (resumeId) {
         // Update existing resume
@@ -780,6 +801,7 @@ export function ResumeBuilder() {
                       data={formData as ResumeData} 
                       templateId={selectedTemplate}
                       colorTheme={selectedColorTheme}
+                      showSampleData={false}
                     />
                   </div>
                 </div>
