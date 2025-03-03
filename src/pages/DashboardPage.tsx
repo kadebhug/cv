@@ -4,12 +4,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { getUserResumes, deleteResume } from '../services/resumeService';
 import { ResumeData } from '../types/resume';
 import { FaPlus, FaEdit, FaTrash, FaEye, FaFileDownload, FaSpinner } from 'react-icons/fa';
+import { ResumePreviewModal } from '../components/ResumePreviewModal';
 
 export function DashboardPage() {
   const [resumes, setResumes] = useState<ResumeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [previewResumeId, setPreviewResumeId] = useState<string | null>(null);
   const { currentUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -50,6 +52,14 @@ export function DashboardPage() {
     }
   };
 
+  const handlePreviewClick = (resumeId: string) => {
+    setPreviewResumeId(resumeId);
+  };
+
+  const closePreviewModal = () => {
+    setPreviewResumeId(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
@@ -61,6 +71,13 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      {previewResumeId && (
+        <ResumePreviewModal 
+          resumeId={previewResumeId} 
+          onClose={closePreviewModal} 
+        />
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Resumes</h1>
@@ -135,13 +152,13 @@ export function DashboardPage() {
                       <FaEdit className="-ml-0.5 mr-2 h-4 w-4" />
                       Edit
                     </Link>
-                    <Link
-                      to={`/preview/${resume.id}`}
+                    <button
+                      onClick={() => resume.id && handlePreviewClick(resume.id)}
                       className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                       <FaEye className="-ml-0.5 mr-2 h-4 w-4" />
                       Preview
-                    </Link>
+                    </button>
                     <button
                       onClick={() => resume.id && setDeleteConfirm(resume.id)}
                       className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
