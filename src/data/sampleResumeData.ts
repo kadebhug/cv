@@ -11,6 +11,7 @@ export const sampleResumeData: ResumeData = {
     city: 'Cape Town',
     address: '123 Long Street',
     postalCode: '8001',
+    photo: null,
   },
   professionalSummary: 'Results-driven software engineer with 8+ years of experience developing scalable web applications. Proficient in React, Node.js, and cloud technologies. Led multiple successful projects and mentored junior developers. Passionate about clean code and user-centric design.',
   experience: [
