@@ -7,7 +7,6 @@ export function SocialLinksSection() {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'socialLinks',
-    shouldUnregister: true
   })
 
   // Common styling classes

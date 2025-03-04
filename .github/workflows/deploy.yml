@@ -33,6 +33,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
+      - name: Debug Environment Variables
+        run: |
+          echo "Checking if environment variables are set:"
+          echo "VITE_FIREBASE_API_KEY exists: ${{ secrets.VITE_FIREBASE_API_KEY != '' }}"
+          echo "VITE_FIREBASE_AUTH_DOMAIN exists: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN != '' }}"
+          echo "VITE_FIREBASE_PROJECT_ID exists: ${{ secrets.VITE_FIREBASE_PROJECT_ID != '' }}"
+          echo "VITE_FIREBASE_STORAGE_BUCKET exists: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET != '' }}"
+          echo "VITE_FIREBASE_MESSAGING_SENDER_ID exists: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID != '' }}"
+          echo "VITE_FIREBASE_APP_ID exists: ${{ secrets.VITE_FIREBASE_APP_ID != '' }}"
+          echo "VITE_FIREBASE_MEASUREMENT_ID exists: ${{ secrets.VITE_FIREBASE_MEASUREMENT_ID != '' }}"
+        
       - name: Build
         run: npm run build
         env:

@@ -9,7 +9,6 @@ export function SkillsSection() {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'skills',
-    shouldUnregister: true
   })
 
   // Common styling classes

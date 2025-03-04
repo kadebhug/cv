@@ -7,7 +7,6 @@ export function EducationSection() {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'education',
-    shouldUnregister: true
   })
 
   // Common styling classes
