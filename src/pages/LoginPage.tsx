@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { signInWithEmail, signInWithGoogle } from '../services/authService';
 import { FaGoogle, FaEnvelope, FaLock } from 'react-icons/fa';
 
@@ -9,6 +9,10 @@ export function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the redirect path from location state, or default to dashboard
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +21,8 @@ export function LoginPage() {
 
     try {
       await signInWithEmail(email, password);
-      navigate('/dashboard');
+      // Redirect to the page they were trying to access
+      navigate(from, { replace: true });
     } catch (error: any) {
       setError(error.message || 'Failed to sign in');
     } finally {
@@ -31,7 +36,8 @@ export function LoginPage() {
 
     try {
       await signInWithGoogle();
-      navigate('/dashboard');
+      // Redirect to the page they were trying to access
+      navigate(from, { replace: true });
     } catch (error: any) {
       setError(error.message || 'Failed to sign in with Google');
     } finally {

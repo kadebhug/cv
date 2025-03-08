@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { registerWithEmailAndPassword, signInWithGoogle } from '../services/authService';
 import { FaGoogle, FaEnvelope, FaLock, FaUserAlt } from 'react-icons/fa';
 
@@ -10,6 +10,10 @@ export function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the redirect path from location state, or default to dashboard
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +35,8 @@ export function RegisterPage() {
 
     try {
       await registerWithEmailAndPassword(email, password);
-      navigate('/dashboard');
+      // Redirect to the page they were trying to access or dashboard
+      navigate(from, { replace: true });
     } catch (error: any) {
       setError(error.message || 'Failed to create account');
     } finally {
@@ -45,7 +50,8 @@ export function RegisterPage() {
 
     try {
       await signInWithGoogle();
-      navigate('/dashboard');
+      // Redirect to the page they were trying to access or dashboard
+      navigate(from, { replace: true });
     } catch (error: any) {
       setError(error.message || 'Failed to sign in with Google');
     } finally {
