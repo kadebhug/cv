@@ -10,6 +10,8 @@ import { ResumeData, Skill } from '../types/resume'
 import { mergeWithSampleData } from '../utils/resumeUtils'
 import { useState, useEffect } from 'react'
 import { FaDownload, FaExpand, FaCompress, FaEye, FaEyeSlash, FaMobileAlt, FaDesktop } from 'react-icons/fa'
+import { defaultColorTheme } from '../utils/themeUtils'
+import { useTheme } from '../contexts/ThemeContext'
 
 export interface ColorTheme {
   id: string;
@@ -17,13 +19,6 @@ export interface ColorTheme {
   primary: string;
   secondary: string;
 }
-
-const defaultColorTheme: ColorTheme = {
-  id: 'blue',
-  name: 'Blue',
-  primary: '#3b82f6',
-  secondary: '#93c5fd',
-};
 
 interface ResumePreviewerProps {
   data: ResumeData
@@ -53,146 +48,97 @@ export function ResumePreviewer({
   colorTheme = defaultColorTheme,
   showSampleData = false
 }: ResumePreviewerProps) {
-  const [showPlaceholders, setShowPlaceholders] = useState(showSampleData);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentTemplateId, setCurrentTemplateId] = useState(templateId);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isMobileView, setIsMobileView] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [showSample, setShowSample] = useState(showSampleData);
+  const [mobileView, setMobileView] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
-  // Check if device is mobile
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
+    // Initial check
     checkIfMobile();
+
+    // Add event listener
     window.addEventListener('resize', checkIfMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-    };
+
+    // Clean up
+    return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
-  // Handle template changes
   useEffect(() => {
-    if (templateId !== currentTemplateId) {
-      setIsLoading(true);
-      // Small delay to ensure clean unmount
-      const timer = setTimeout(() => {
-        setCurrentTemplateId(templateId);
-        setIsLoading(false);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [templateId, currentTemplateId]);
-
-  // Update showPlaceholders when showSampleData prop changes
-  useEffect(() => {
-    setShowPlaceholders(showSampleData);
+    // Update showSample when showSampleData prop changes
+    setShowSample(showSampleData);
   }, [showSampleData]);
 
-  // Safely get the template component
   const getTemplateComponent = () => {
-    try {
-      if (currentTemplateId in TemplateComponents) {
-        return TemplateComponents[currentTemplateId as keyof typeof TemplateComponents];
-      }
-      console.warn(`Template ${currentTemplateId} not found, falling back to ModernTemplate`);
-      return ModernTemplate;
-    } catch (err) {
-      console.error('Error getting template component:', err);
-      setError('Failed to load template');
-      return ModernTemplate;
-    }
-  };
-
-  const TemplateComponent = getTemplateComponent();
-  
-  // Ensure data structure is correct for the template
-  const normalizeData = (inputData: ResumeData): ResumeData => {
-    try {
-      const normalizedSkills = Array.isArray(inputData.skills) 
-        ? inputData.skills.map(skill => 
-            typeof skill === 'string' 
-              ? { name: skill, level: 'intermediate' }
-              : skill
-          )
-        : [];
-
-      return {
-        ...inputData,
-        skills: normalizedSkills as Skill[],
-        personal: {
-          ...{  // Default values
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            country: '',
-            city: '',
-            address: '',
-            postalCode: '',
-            jobTitle: '',
-          },
-          ...inputData.personal,  // Overwrite defaults with actual data
-        },
-        experience: Array.isArray(inputData.experience) ? inputData.experience : [],
-        education: Array.isArray(inputData.education) ? inputData.education : [],
-        socialLinks: Array.isArray(inputData.socialLinks) ? inputData.socialLinks : [],
-        professionalSummary: inputData.professionalSummary || '',
-      };
-    } catch (err) {
-      console.error('Error normalizing data:', err);
-      setError('Failed to process resume data');
-      return inputData;
-    }
-  };
-
-  // Check if the data is mostly empty
-  const isDataMostlyEmpty = () => {
-    const hasExperience = Array.isArray(data.experience) && data.experience.length > 0;
-    const hasEducation = Array.isArray(data.education) && data.education.length > 0;
-    const hasSkills = Array.isArray(data.skills) && data.skills.length > 0;
-    const hasSummary = data.professionalSummary && data.professionalSummary.trim() !== '';
+    const TemplateComponent = TemplateComponents[templateId as keyof typeof TemplateComponents] || TemplateComponents.modern;
     
-    // If most sections are empty, suggest showing sample data
-    return !hasExperience && !hasEducation && !hasSkills && !hasSummary;
+    // Prepare data - use sample data if needed
+    const resumeData = showSample ? mergeWithSampleData(data) : normalizeData(data);
+    
+    return <TemplateComponent data={resumeData} colorTheme={colorTheme} />;
   };
 
-  // Merge user data with sample data if showPlaceholders is true and normalize it
-  const displayData = normalizeData(
-    showPlaceholders ? mergeWithSampleData(data) : data
-  );
+  const normalizeData = (inputData: ResumeData): ResumeData => {
+    // Create a deep copy to avoid modifying the original
+    const normalizedData = JSON.parse(JSON.stringify(inputData));
+    
+    // Ensure skills have a level if not specified
+    if (normalizedData.skills) {
+      normalizedData.skills = normalizedData.skills.map((skill: Skill) => {
+        if (!skill.level) {
+          return { ...skill, level: 'intermediate' };
+        }
+        return skill;
+      });
+    }
+    
+    // Ensure experience items have a description
+    if (normalizedData.experience) {
+      normalizedData.experience = normalizedData.experience.map((exp: any) => {
+        if (!exp.description) {
+          return { ...exp, description: '' };
+        }
+        return exp;
+      });
+    }
+    
+    return normalizedData;
+  };
 
-  // Toggle fullscreen preview
+  const isDataMostlyEmpty = () => {
+    // Check if most of the data is empty
+    const { personal, experience, education, skills } = data;
+    
+    const hasPersonal = personal && (personal.firstName || personal.lastName);
+    const hasExperience = experience && experience.length > 0;
+    const hasEducation = education && education.length > 0;
+    const hasSkills = skills && skills.length > 0;
+    
+    return !hasPersonal || (!hasExperience && !hasEducation && !hasSkills);
+  };
+
   const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
+    setFullscreen(!fullscreen);
   };
 
-  // Toggle mobile view
   const toggleMobileView = () => {
-    setIsMobileView(!isMobileView);
+    setMobileView(!mobileView);
   };
 
-  // Handle download (placeholder for future implementation)
   const handleDownload = () => {
-    alert('Download functionality will be implemented soon!');
-    // Future implementation: Generate and download PDF
+    // This would be handled by the PDF library
+    console.log('Download functionality would be implemented here');
+    // In a real implementation, you would trigger the PDF download
   };
 
-  if (error) {
-    return (
-      <div className="bg-red-50 p-4 rounded-lg">
-        <p className="text-red-600">{error}</p>
-      </div>
-    );
-  }
-
-  // Calculate appropriate height based on screen size and fullscreen state
   const getViewerHeight = () => {
-    if (isFullscreen) {
+    if (fullscreen) {
       return 'h-[calc(100vh-120px)]';
     } else if (isMobile) {
       return 'h-[500px]';
@@ -202,75 +148,98 @@ export function ResumePreviewer({
   };
 
   return (
-    <div className={`bg-white shadow-sm rounded-lg transition-all duration-300 flex flex-col ${isFullscreen ? 'fixed inset-0 z-50 p-4' : 'p-4 h-full'}`}>
-      <div className="flex flex-wrap justify-between items-center mb-3">
-        <h2 className="text-lg font-semibold text-gray-900 mb-2 sm:mb-0">Resume Preview</h2>
-        <div className="flex items-center space-x-2">
+    <div className={`resume-previewer ${fullscreen ? 'fixed inset-0 z-50 bg-gray-100 dark:bg-gray-900 p-4' : ''}`}>
+      {/* Controls */}
+      <div className={`flex justify-between items-center mb-3 ${fullscreen ? 'px-4' : ''}`}>
+        <div className="flex space-x-2">
           <button 
-            onClick={() => setShowPlaceholders(!showPlaceholders)}
-            className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-            title={showPlaceholders ? "Hide placeholders" : "Show placeholders"}
+            onClick={() => setShowSample(!showSample)}
+            className="btn btn-secondary text-xs p-1.5 flex items-center"
+            title={showSample ? "Hide sample data" : "Show with sample data"}
           >
-            {showPlaceholders ? <FaEye size={14} /> : <FaEyeSlash size={14} />}
+            {showSample ? (
+              <>
+                <FaEyeSlash className="mr-1" size={12} />
+                <span className="hidden sm:inline">Hide Sample</span>
+              </>
+            ) : (
+              <>
+                <FaEye className="mr-1" size={12} />
+                <span className="hidden sm:inline">Show Sample</span>
+              </>
+            )}
           </button>
+          
           <button 
             onClick={toggleMobileView}
-            className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-            title={isMobileView ? "Desktop view" : "Mobile view"}
+            className="btn btn-secondary text-xs p-1.5 flex items-center"
+            title={mobileView ? "Desktop view" : "Mobile view"}
           >
-            {isMobileView ? <FaDesktop size={14} /> : <FaMobileAlt size={14} />}
+            {mobileView ? (
+              <>
+                <FaDesktop className="mr-1" size={12} />
+                <span className="hidden sm:inline">Desktop</span>
+              </>
+            ) : (
+              <>
+                <FaMobileAlt className="mr-1" size={12} />
+                <span className="hidden sm:inline">Mobile</span>
+              </>
+            )}
           </button>
+        </div>
+        
+        <div className="flex space-x-2">
           <button 
             onClick={handleDownload}
-            className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+            className="btn btn-primary text-xs p-1.5 flex items-center"
             title="Download PDF"
           >
-            <FaDownload size={14} />
+            <FaDownload className="mr-1" size={12} />
+            <span className="hidden sm:inline">Download</span>
           </button>
+          
           <button 
             onClick={toggleFullscreen}
-            className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-            title={isFullscreen ? "Exit fullscreen" : "Fullscreen preview"}
+            className="btn btn-secondary text-xs p-1.5 flex items-center"
+            title={fullscreen ? "Exit fullscreen" : "Fullscreen"}
           >
-            {isFullscreen ? <FaCompress size={14} /> : <FaExpand size={14} />}
+            {fullscreen ? (
+              <>
+                <FaCompress className="mr-1" size={12} />
+                <span className="hidden sm:inline">Exit</span>
+              </>
+            ) : (
+              <>
+                <FaExpand className="mr-1" size={12} />
+                <span className="hidden sm:inline">Fullscreen</span>
+              </>
+            )}
           </button>
         </div>
       </div>
       
-      <div className="flex flex-wrap items-center mb-3 gap-3">
-        <label className="inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            checked={showPlaceholders}
-            onChange={() => setShowPlaceholders(!showPlaceholders)}
-            className="sr-only peer"
-          />
-          <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          <span className="ml-3 text-sm font-medium text-gray-700">
-            Show sample data
-          </span>
-        </label>
-        
-        {isDataMostlyEmpty() && !showPlaceholders && (
-          <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
-            Your resume is mostly empty. Toggle sample data to see how it will look when complete.
-          </div>
-        )}
-      </div>
-      
-      <div className={`${getViewerHeight()} ${isMobileView ? 'max-w-[375px] mx-auto' : 'w-full'} flex-grow`}>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      {/* PDF Viewer */}
+      <div className={`${mobileView ? 'max-w-[400px]' : ''} mx-auto transition-all duration-300`}>
+        {isDataMostlyEmpty() && !showSample ? (
+          <div 
+            className={`flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 ${getViewerHeight()}`}
+          >
+            <p className="text-gray-500 dark:text-gray-400 text-center mb-4">
+              Your resume is empty. Add some information or enable sample data to see a preview.
+            </p>
+            <button 
+              onClick={() => setShowSample(true)}
+              className="btn btn-primary text-sm"
+            >
+              Show with sample data
+            </button>
           </div>
         ) : (
           <PDFViewer 
-            width="100%" 
-            height="100%" 
-            className="rounded border border-gray-200"
-            showToolbar={!isMobile}
+            className={`w-full rounded-lg border ${isDark ? 'border-gray-700' : 'border-gray-200'} ${getViewerHeight()}`}
           >
-            <TemplateComponent data={displayData} colorTheme={colorTheme} />
+            {getTemplateComponent()}
           </PDFViewer>
         )}
       </div>

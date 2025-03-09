@@ -151,11 +151,7 @@ export function SignatureCanvas({ onSave, initialSignature }: SignatureCanvasPro
       <div className="flex space-x-5 w-full justify-center">
         <button
           onClick={clearCanvas}
-          className={`flex items-center px-5 py-2.5 rounded-md transition-colors ${
-            theme === 'dark' 
-              ? 'bg-red-900 text-red-300 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2 focus:ring-offset-gray-900' 
-              : 'bg-red-100 text-red-600 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
-          } shadow-sm`}
+          className="btn btn-danger flex items-center"
         >
           <FaTrash className="mr-2 h-4 w-4" />
           <span className="font-medium">Clear</span>
@@ -163,11 +159,7 @@ export function SignatureCanvas({ onSave, initialSignature }: SignatureCanvasPro
         
         <button
           onClick={saveSignature}
-          className={`flex items-center px-5 py-2.5 text-white rounded-md transition-colors ${
-            theme === 'dark' 
-              ? 'bg-indigo-700 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900' 
-              : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-          } shadow-sm`}
+          className="btn btn-primary flex items-center"
         >
           <FaSave className="mr-2 h-4 w-4" />
           <span className="font-medium">Save Signature</span>

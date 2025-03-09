@@ -5,7 +5,7 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { resumeSchema } from '../schemas/resumeSchemas'
 import { ResumeData } from '../types/resume'
-import { FaUser, FaFileAlt, FaBriefcase, FaGraduationCap, FaTools, FaLink, FaPuzzlePiece, FaHeart, FaChevronLeft, FaChevronRight, FaBars, FaTimes, FaPalette, FaCheck, FaRobot, FaLightbulb, FaLayerGroup, FaEdit, FaLinkedin } from 'react-icons/fa'
+import { FaUser, FaFileAlt, FaBriefcase, FaGraduationCap, FaTools, FaLink, FaPuzzlePiece, FaHeart, FaChevronLeft, FaChevronRight, FaBars, FaTimes, FaPalette, FaCheck, FaRobot, FaLightbulb, FaLayerGroup, FaEdit, FaLinkedin, FaSpinner, FaSave } from 'react-icons/fa'
 import { ResumeFeedback } from './ResumeFeedback'
 import { ATSOptimizer } from './ATSOptimizer'
 import { TemplateSelector } from './TemplateSelector'
@@ -13,6 +13,7 @@ import { LinkedInImport } from './LinkedInImport'
 import { useAuth } from '../contexts/AuthContext'
 import { saveResume, updateResume, getResume } from '../services/resumeService'
 import { useParams, useNavigate } from 'react-router-dom'
+import { colorThemes, getColorThemeById } from '../utils/themeUtils'
 
 const sections = [
   { id: 'personal', title: 'Personal Details', icon: FaUser, description: 'Basic information about you' },
@@ -125,16 +126,6 @@ const templateCategories = [
   { id: 'healthcare', name: 'Healthcare' },
   { id: 'education', name: 'Education' },
   { id: 'legal', name: 'Legal' }
-];
-
-// Available color themes
-const colorThemes: ColorTheme[] = [
-  { id: 'blue', name: 'Blue', primary: '#3b82f6', secondary: '#93c5fd' },
-  { id: 'green', name: 'Green', primary: '#10b981', secondary: '#a7f3d0' },
-  { id: 'purple', name: 'Purple', primary: '#8b5cf6', secondary: '#c4b5fd' },
-  { id: 'red', name: 'Red', primary: '#ef4444', secondary: '#fca5a5' },
-  { id: 'amber', name: 'Amber', primary: '#f59e0b', secondary: '#fcd34d' },
-  { id: 'gray', name: 'Gray', primary: '#4b5563', secondary: '#d1d5db' },
 ];
 
 export function ResumeBuilder() {
@@ -486,13 +477,6 @@ export function ResumeBuilder() {
                       <FaLayerGroup className="mr-1" size={14} />
                       Template
                     </h2>
-                    <button 
-                      onClick={() => setShowTemplateSelector(true)}
-                      className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
-                    >
-                      <FaEdit className="mr-1" size={12} />
-                      Browse All
-                    </button>
                   </div>
                 )}
                 
@@ -501,9 +485,6 @@ export function ResumeBuilder() {
                   onClick={() => setShowTemplateSelector(true)}
                   className="bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-blue-300 transition-colors mb-4"
                 >
-                  <div className="h-20 bg-gray-100 rounded flex items-center justify-center mb-2">
-                    <span className="text-lg font-medium text-gray-500">{templates.find(t => t.id === selectedTemplate)?.name}</span>
-                  </div>
                   {!sidebarCollapsed && (
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">{templates.find(t => t.id === selectedTemplate)?.name}</span>
@@ -520,28 +501,6 @@ export function ResumeBuilder() {
                   )}
                 </div>
                 
-                {/* Popular Templates Quick Select */}
-                {!sidebarCollapsed && (
-                  <>
-                    <div className="text-xs text-gray-500 mb-2">Popular Templates:</div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {templates.filter(t => t.popular).slice(0, 6).map(template => (
-                        <button
-                          key={template.id}
-                          onClick={() => handleTemplateChange(template.id)}
-                          className={`p-1 border rounded transition-all ${
-                            selectedTemplate === template.id
-                              ? 'border-blue-500 bg-blue-50 text-blue-700'
-                              : 'border-gray-200 hover:bg-gray-50 text-gray-700'
-                          }`}
-                          title={template.name}
-                        >
-                          <div className="text-xs truncate">{template.name}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
               </div>
 
               {/* Color Theme Selection */}
@@ -552,15 +511,15 @@ export function ResumeBuilder() {
                     Color Theme
                   </h2>
                 )}
-                <div className={`${isMobile ? 'grid grid-cols-3 gap-2' : 'flex flex-wrap gap-2'}`}>
+                <div className={`${isMobile ? 'grid grid-cols-4 gap-2' : 'flex flex-wrap gap-2'}`}>
                   {colorThemes.map(theme => (
                     <button
                       key={theme.id}
                       onClick={() => handleColorThemeChange(theme)}
-                      className={`relative rounded-full w-8 h-8 flex items-center justify-center border-2 ${
+                      className={`relative rounded-full w-8 h-8 flex items-center justify-center border-2 transition-all duration-200 ${
                         selectedColorTheme.id === theme.id
-                          ? 'border-gray-800'
-                          : 'border-transparent hover:border-gray-300'
+                          ? 'border-gray-800 dark:border-white scale-110'
+                          : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600 hover:scale-105'
                       }`}
                       style={{ backgroundColor: theme.primary }}
                       title={theme.name}
@@ -578,9 +537,19 @@ export function ResumeBuilder() {
                 <button
                   onClick={handleSaveResume}
                   disabled={isSaving}
-                  className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                  className="btn btn-primary flex items-center"
                 >
-                  {isSaving ? 'Saving...' : resumeId ? 'Update Resume' : 'Save Resume'}
+                  {isSaving ? (
+                    <>
+                      <FaSpinner className="animate-spin mr-2 h-5 w-5" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave className="mr-2 h-5 w-5" />
+                      Save Resume
+                    </>
+                  )}
                 </button>
                 
                 {saveSuccess && (
@@ -631,23 +600,19 @@ export function ResumeBuilder() {
                         <div className="flex justify-between">
                           <button
                             onClick={goToPreviousSection}
-                            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                            className="btn btn-secondary flex items-center"
                             disabled={activeSection === sections[0].id}
                           >
-                            <div className="flex items-center">
-                              <FaChevronLeft className="mr-2 h-3 w-3" />
-                              <span>Previous</span>
-                            </div>
+                            <FaChevronLeft className="mr-2 h-3 w-3" />
+                            <span>Previous</span>
                           </button>
                           <button
                             onClick={goToNextSection}
-                            className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                            className="btn btn-primary flex items-center"
                             disabled={activeSection === sections[sections.length - 1].id}
                           >
-                            <div className="flex items-center">
-                              <span>Next</span>
-                              <FaChevronRight className="ml-2 h-3 w-3" />
-                            </div>
+                            <span>Next</span>
+                            <FaChevronRight className="ml-2 h-3 w-3" />
                           </button>
                         </div>
                       </div>

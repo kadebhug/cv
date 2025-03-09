@@ -4,13 +4,98 @@
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --transition-speed: 0.3s;
 }
 
+/* Base styles */
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #f9fafb;
+  @apply bg-gray-50 text-gray-900 transition-colors duration-300;
+}
+
+/* Dark mode styles */
+.dark body {
+  @apply bg-gray-900 text-gray-100;
+}
+
+/* Global transitions for theme changes */
+* {
+  transition: background-color var(--transition-speed), 
+              border-color var(--transition-speed), 
+              color var(--transition-speed),
+              fill var(--transition-speed),
+              stroke var(--transition-speed);
+}
+
+/* Button styles */
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+/* Button variants */
+.btn-primary {
+  @apply bg-primary-blue text-white hover:bg-primary-blue/90 focus:ring-primary-blue;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 focus:ring-gray-400 dark:focus:ring-gray-500;
+}
+
+.btn-danger {
+  @apply bg-primary-red text-white hover:bg-primary-red/90 focus:ring-primary-red;
+}
+
+.btn-success {
+  @apply bg-primary-green text-white hover:bg-primary-green/90 focus:ring-primary-green;
+}
+
+.btn-warning {
+  @apply bg-primary-amber text-white hover:bg-primary-amber/90 focus:ring-primary-amber;
+}
+
+.btn-info {
+  @apply bg-primary-cyan text-white hover:bg-primary-cyan/90 focus:ring-primary-cyan;
+}
+
+.btn-outline-primary {
+  @apply border border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white focus:ring-primary-blue;
+}
+
+.btn-outline-secondary {
+  @apply border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 focus:ring-gray-400 dark:focus:ring-gray-500;
+}
+
+/* Button sizes */
+.btn-xs {
+  @apply px-2 py-1 text-xs;
+}
+
+.btn-sm {
+  @apply px-3 py-1.5 text-sm;
+}
+
+.btn-lg {
+  @apply px-5 py-2.5 text-lg;
+}
+
+.btn-xl {
+  @apply px-6 py-3 text-xl;
+}
+
+.btn-icon {
+  @apply p-2 rounded-full;
+}
+
+/* Input styles */
+.input {
+  @apply px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-primary-indigo transition-all duration-200;
+}
+
+/* Card styles */
+.card {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 transition-all duration-200;
 }
 
 /* Remove all the other default styles */

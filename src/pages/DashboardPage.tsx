@@ -8,6 +8,7 @@ import { FaPlus, FaEdit, FaTrash, FaEye, FaFileDownload, FaSpinner, FaBriefcase,
 import { ResumePreviewModal } from '../components/ResumePreviewModal';
 import { CoverLetterPreviewModal } from '../components/CoverLetterPreviewModal';
 import { JobSearch } from '../components/JobSearch';
+import { useTheme } from '../contexts/ThemeContext';
 
 // Cover Letter Data Interface
 interface CoverLetterData {
@@ -33,6 +34,8 @@ export function DashboardPage() {
   const [previewCoverLetterId, setPreviewCoverLetterId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'resumes' | 'jobSearch' | 'coverLetters' | 'interviews'>('resumes');
   const { currentUser, loading: authLoading } = useAuth();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -238,7 +241,7 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} py-8`}>
       {previewResumeId && (
         <ResumePreviewModal 
           resumeId={previewResumeId} 
@@ -258,10 +261,10 @@ export function DashboardPage() {
         <div className="mb-8">
           
           {/* User welcome card */}
-          <div className="w-full mb-8 bg-indigo-600 rounded-lg">
+          <div className="w-full mb-8 bg-primary-blue rounded-lg">
             <div className="px-6 py-8 flex flex-col md:flex-row md:items-center">
               <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-8">
-                <div className="w-16 h-16 rounded-full bg-indigo-700 flex items-center justify-center text-white">
+                <div className="w-16 h-16 rounded-full bg-primary-blue/80 flex items-center justify-center text-white">
                   <FaUserTie className="h-8 w-8" />
                 </div>
               </div>
@@ -273,10 +276,10 @@ export function DashboardPage() {
                   Build your professional career with our tools
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <div className="px-3 py-1 bg-indigo-700 rounded-full text-xs text-white">
+                  <div className="px-3 py-1 border border-primary-white rounded-full text-xs text-white">
                     {resumes.length} {resumes.length === 1 ? 'Resume' : 'Resumes'}
                   </div>
-                  <div className="px-3 py-1 bg-indigo-700 rounded-full text-xs text-white">
+                  <div className="px-3 py-1 border border-primary-white rounded-full text-xs text-white">
                     {coverLetters.length} {coverLetters.length === 1 ? 'Cover Letter' : 'Cover Letters'}
                   </div>
                 </div>
@@ -347,32 +350,32 @@ export function DashboardPage() {
           {/* Resumes Section */}
           {activeTab === 'resumes' && (
             <div>
-              <div className="p-5 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-800">My Resumes</h2>
+              <div className={`p-5 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} flex justify-between items-center`}>
+                <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>My Resumes</h2>
                 <Link
                   to="/create-resume"
-                  className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
+                  className="btn btn-primary"
                 >
-                  <FaPlus className="-ml-1 mr-2 h-4 w-4" />
+                  <FaPlus className="mr-2 h-4 w-4" />
                   Create New Resume
                 </Link>
               </div>
               
               {resumes.length === 0 ? (
                 <div className="p-10 text-center">
-                  <div className="inline-flex items-center justify-center p-4 rounded-full bg-indigo-100 mb-4">
-                    <FaFileAlt className="h-8 w-8 text-indigo-500" />
+                  <div className={`inline-flex items-center justify-center p-4 rounded-full ${isDark ? 'bg-primary-indigo/20' : 'bg-primary-indigo/10'} mb-4`}>
+                    <FaFileAlt className={`h-8 w-8 ${isDark ? 'text-primary-indigo' : 'text-primary-indigo'}`} />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900">No resumes yet</h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>No resumes yet</h3>
+                  <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                     Get started by creating a new resume.
                   </p>
                   <div className="mt-6">
                     <Link
                       to="/create-resume"
-                      className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
+                      className="btn btn-primary"
                     >
-                      <FaPlus className="-ml-1 mr-2 h-4 w-4" />
+                      <FaPlus className="mr-2 h-4 w-4" />
                       Create New Resume
                     </Link>
                   </div>
@@ -383,55 +386,166 @@ export function DashboardPage() {
                     {resumes.map((resume) => (
                       <div
                         key={resume.id}
-                        className="border border-gray-200 rounded-lg overflow-hidden hover:border-indigo-300 transition-colors duration-300"
+                        className={`border rounded-lg overflow-hidden transition-colors duration-300 ${
+                          isDark 
+                            ? 'border-gray-700 hover:border-primary-indigo/50 bg-gray-800' 
+                            : 'border-gray-200 hover:border-primary-indigo/50 bg-white'
+                        }`}
                       >
-                        <div className="px-4 py-5 sm:px-6 bg-white border-b border-gray-200">
-                          <h3 className="text-lg font-medium text-indigo-700 truncate">
+                        <div className={`px-4 py-5 sm:px-6 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+                          <h3 className={`text-lg font-medium ${isDark ? 'text-primary-indigo' : 'text-primary-indigo'} truncate`}>
                             {resume.name || `${resume.personal?.firstName || ''} ${resume.personal?.lastName || ''}'s Resume`}
                           </h3>
-                          <p className="mt-1 text-xs text-gray-500">
+                          <p className={`mt-1 text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                             Last updated: {resume.updatedAt?.toLocaleDateString() || 'N/A'}
                           </p>
                         </div>
-                        <div className="px-4 py-4 sm:px-6 bg-gray-50">
+                        <div className={`px-4 py-4 sm:px-6 ${isDark ? 'bg-gray-700/30' : 'bg-gray-50'}`}>
                           <div className="flex justify-between space-x-3">
                             <Link
                               to={`/edit/${resume.id}`}
-                              className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-200 rounded-lg text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300"
+                              className="btn btn-outline-primary flex-1"
                             >
                               <FaEdit className="mr-2 h-4 w-4" />
                               Edit
                             </Link>
                             <button
                               onClick={() => resume.id && handlePreviewClick(resume.id)}
-                              className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-200 rounded-lg text-purple-600 hover:bg-purple-50 hover:border-purple-200 transition-all duration-300"
+                              className="btn btn-outline-secondary flex-1"
                             >
                               <FaEye className="mr-2 h-4 w-4" />
                               Preview
                             </button>
                             <button
                               onClick={() => resume.id && setDeleteConfirm(resume.id)}
-                              className="inline-flex items-center justify-center p-2 bg-white border border-gray-200 rounded-lg text-red-600 hover:bg-red-50 hover:border-red-200 transition-all duration-300"
+                              className="btn btn-outline-secondary btn-icon"
                             >
-                              <FaTrash className="h-4 w-4" />
+                              <FaTrash className="h-4 w-4 text-primary-red" />
                             </button>
                           </div>
                           
                           {deleteConfirm === resume.id && (
-                            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
-                              <p className="text-sm text-red-700 mb-3">
+                            <div className={`mt-4 ${isDark ? 'bg-red-900/30 border-red-800' : 'bg-red-50 border-red-200'} border rounded-lg p-4`}>
+                              <p className={`text-sm ${isDark ? 'text-red-300' : 'text-red-700'} mb-3`}>
                                 Are you sure you want to delete this resume? This action cannot be undone.
                               </p>
                               <div className="flex space-x-3">
                                 <button
                                   onClick={() => resume.id && handleDeleteResume(resume.id)}
-                                  className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 transition-all duration-300"
+                                  className="btn btn-danger flex-1"
                                 >
                                   Confirm Delete
                                 </button>
                                 <button
                                   onClick={() => setDeleteConfirm(null)}
-                                  className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300"
+                                  className="btn btn-secondary flex-1"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Cover Letters Section */}
+          {activeTab === 'coverLetters' && (
+            <div>
+              <div className={`p-5 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} flex justify-between items-center`}>
+                <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>My Cover Letters</h2>
+                <Link
+                  to="/create-cover-letter"
+                  className="btn btn-primary"
+                >
+                  <FaPlus className="mr-2 h-4 w-4" />
+                  Create New Cover Letter
+                </Link>
+              </div>
+              
+              {coverLetters.length === 0 ? (
+                <div className="p-10 text-center">
+                  <div className={`inline-flex items-center justify-center p-4 rounded-full ${isDark ? 'bg-primary-indigo/20' : 'bg-primary-indigo/10'} mb-4`}>
+                    <FaEnvelope className={`h-8 w-8 ${isDark ? 'text-primary-indigo' : 'text-primary-indigo'}`} />
+                  </div>
+                  <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>No cover letters yet</h3>
+                  <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Get started by creating a new cover letter.
+                  </p>
+                  <div className="mt-6">
+                    <Link
+                      to="/create-cover-letter"
+                      className="btn btn-primary"
+                    >
+                      <FaPlus className="mr-2 h-4 w-4" />
+                      Create New Cover Letter
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6">
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {coverLetters.map((letter) => (
+                      <div
+                        key={letter.id}
+                        className={`border rounded-lg overflow-hidden transition-colors duration-300 ${
+                          isDark 
+                            ? 'border-gray-700 hover:border-primary-indigo/50 bg-gray-800' 
+                            : 'border-gray-200 hover:border-primary-indigo/50 bg-white'
+                        }`}
+                      >
+                        <div className={`px-4 py-5 sm:px-6 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+                          <h3 className={`text-lg font-medium ${isDark ? 'text-primary-indigo' : 'text-primary-indigo'} truncate`}>
+                            {letter.name}
+                          </h3>
+                          <p className={`mt-1 text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                            For: {letter.position} at {letter.recipientCompany}
+                          </p>
+                        </div>
+                        <div className={`px-4 py-4 sm:px-6 ${isDark ? 'bg-gray-700/30' : 'bg-gray-50'}`}>
+                          <div className="flex justify-between space-x-3">
+                            <Link
+                              to={`/edit-cover-letter/${letter.id}`}
+                              className="btn btn-outline-primary flex-1"
+                            >
+                              <FaEdit className="mr-2 h-4 w-4" />
+                              Edit
+                            </Link>
+                            <button
+                              onClick={() => letter.id && handleCoverLetterPreviewClick(letter.id)}
+                              className="btn btn-outline-secondary flex-1"
+                            >
+                              <FaEye className="mr-2 h-4 w-4" />
+                              Preview
+                            </button>
+                            <button
+                              onClick={() => letter.id && setDeleteCoverLetterConfirm(letter.id)}
+                              className="btn btn-outline-secondary btn-icon"
+                            >
+                              <FaTrash className="h-4 w-4 text-primary-red" />
+                            </button>
+                          </div>
+                          
+                          {deleteCoverLetterConfirm === letter.id && (
+                            <div className={`mt-4 ${isDark ? 'bg-red-900/30 border-red-800' : 'bg-red-50 border-red-200'} border rounded-lg p-4`}>
+                              <p className={`text-sm ${isDark ? 'text-red-300' : 'text-red-700'} mb-3`}>
+                                Are you sure you want to delete this cover letter? This action cannot be undone.
+                              </p>
+                              <div className="flex space-x-3">
+                                <button
+                                  onClick={() => letter.id && handleDeleteCoverLetter(letter.id)}
+                                  className="btn btn-danger flex-1"
+                                >
+                                  Confirm Delete
+                                </button>
+                                <button
+                                  onClick={() => setDeleteCoverLetterConfirm(null)}
+                                  className="btn btn-secondary flex-1"
                                 >
                                   Cancel
                                 </button>
@@ -449,82 +563,42 @@ export function DashboardPage() {
 
           {/* Job Search Section */}
           {activeTab === 'jobSearch' && (
-            <div>
-              <div className="p-5 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-800 mb-1">Job Search</h2>
-                <p className="text-sm text-gray-600">
-                  Find and apply for jobs that match your skills and experience
-                </p>
-              </div>
-              <div className="p-6">
-                {resumes.length > 0 ? (
-                  <JobSearch resumeData={resumes[0]} />
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="inline-flex items-center justify-center p-4 rounded-full bg-indigo-100 mb-4">
-                      <FaBriefcase className="h-8 w-8 text-indigo-500" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900">No resume found</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      You need to create a resume before you can search for jobs.
-                    </p>
-                    <div className="mt-6">
-                      <Link
-                        to="/create-resume"
-                        className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
-                      >
-                        <FaPlus className="-ml-1 mr-2 h-4 w-4" />
-                        Create New Resume
-                      </Link>
-                    </div>
+            <div className="p-6">
+              {resumes.length > 0 ? (
+                <JobSearch resumeData={resumes[0]} />
+              ) : (
+                <div className="text-center py-10">
+                  <div className={`inline-flex items-center justify-center p-4 rounded-full ${isDark ? 'bg-primary-indigo/20' : 'bg-primary-indigo/10'} mb-4`}>
+                    <FaBriefcase className={`h-8 w-8 ${isDark ? 'text-primary-indigo' : 'text-primary-indigo'}`} />
                   </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Cover Letters Section */}
-          {activeTab === 'coverLetters' && (
-            <div>
-              <div className="p-5 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-800">Cover Letters</h2>
-                <Link
-                  to="/create-cover-letter"
-                  className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
-                >
-                  <FaPlus className="-ml-1 mr-2 h-4 w-4" />
-                  Create Cover Letter
-                </Link>
-              </div>
-              {renderCoverLettersSection()}
+                  <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>No resume available</h3>
+                  <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    You need to create a resume first to search for jobs.
+                  </p>
+                  <div className="mt-6">
+                    <Link
+                      to="/create-resume"
+                      className="btn btn-primary"
+                    >
+                      <FaPlus className="mr-2 h-4 w-4" />
+                      Create New Resume
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
           {/* Interviews Section */}
           {activeTab === 'interviews' && (
-            <div>
-              <div className="p-5 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-800">Interviews</h2>
-                <Link
-                  to="/create-resume"
-                  className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
-                >
-                  <FaPlus className="-ml-1 mr-2 h-4 w-4" />
-                  Schedule Interview
-                </Link>
+            <div className="p-10 text-center">
+              <div className={`inline-flex items-center justify-center p-4 rounded-full ${isDark ? 'bg-primary-indigo/20' : 'bg-primary-indigo/10'} mb-4`}>
+                <FaCalendarCheck className={`h-8 w-8 ${isDark ? 'text-primary-indigo' : 'text-primary-indigo'}`} />
               </div>
-              <div className="p-10 text-center">
-                <div className="inline-flex items-center justify-center p-4 rounded-full bg-indigo-100 mb-4">
-                  <FaCalendarCheck className="h-8 w-8 text-indigo-500" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">No interviews scheduled</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Track and prepare for your upcoming interviews.
-                </p>
-                <p className="mt-2 text-sm text-gray-500">
-                  Coming soon! This feature is under development.
-                </p>
-              </div>
+              <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Coming Soon</h3>
+              <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                Interview scheduling and preparation tools will be available soon.
+              </p>
             </div>
           )}
         </div>

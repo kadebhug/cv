@@ -178,7 +178,7 @@ export function CoverLetterBuilder() {
         <div className="flex items-center">
           <button
             onClick={() => navigate('/dashboard')}
-            className={`mr-4 p-2.5 rounded-full ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+            className="btn btn-secondary p-2.5 rounded-full flex items-center justify-center"
           >
             <FaChevronLeft className="h-5 w-5" />
           </button>
@@ -577,7 +577,7 @@ export function CoverLetterBuilder() {
           <button
             type="submit"
             disabled={saving || !isDirty}
-            className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-md text-white ${theme === 'dark' ? 'bg-indigo-700 hover:bg-indigo-800' : 'bg-indigo-600 hover:bg-indigo-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-colors`}
+            className="btn btn-primary flex items-center"
           >
             {saving ? (
               <>

@@ -105,7 +105,7 @@ export function JobSearch({ resumeData }: JobSearchProps) {
           <button
             className={`flex-1 py-3 px-4 text-center font-medium ${
               activeTab === 'recommended'
-                ? 'text-blue-600 border-b-2 border-blue-600'
+                ? 'text-primary-blue border-b-2 border-primary-blue'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
             onClick={() => setActiveTab('recommended')}
@@ -116,7 +116,7 @@ export function JobSearch({ resumeData }: JobSearchProps) {
           <button
             className={`flex-1 py-3 px-4 text-center font-medium ${
               activeTab === 'search'
-                ? 'text-blue-600 border-b-2 border-blue-600'
+                ? 'text-primary-blue border-b-2 border-primary-blue'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
             onClick={() => setActiveTab('search')}
@@ -127,7 +127,7 @@ export function JobSearch({ resumeData }: JobSearchProps) {
           <button
             className={`flex-1 py-3 px-4 text-center font-medium ${
               activeTab === 'history'
-                ? 'text-blue-600 border-b-2 border-blue-600'
+                ? 'text-primary-blue border-b-2 border-primary-blue'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
             onClick={() => setActiveTab('history')}
@@ -316,16 +316,14 @@ export function JobSearch({ resumeData }: JobSearchProps) {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setSelectedJob(null)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="btn btn-secondary flex items-center"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleApply}
                   disabled={isApplying}
-                  className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors ${
-                    isApplying ? 'opacity-70 cursor-not-allowed' : ''
-                  }`}
+                  className="btn btn-primary flex items-center"
                 >
                   {isApplying ? 'Submitting...' : 'Submit Application'}
                 </button>
