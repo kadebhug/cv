@@ -123,10 +123,21 @@ export function SignatureCanvas({ onSave, initialSignature }: SignatureCanvasPro
   
   return (
     <div className="flex flex-col items-center">
-      <div className={`border-2 rounded-lg ${theme === 'dark' ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-white'} mb-4`}>
+      <div className={`border-2 rounded-lg ${
+        theme === 'dark' 
+          ? 'border-gray-600 bg-gray-800' 
+          : 'border-gray-300 bg-white'
+      } mb-6 w-full shadow-md overflow-hidden`}>
+        <div className={`p-2 text-sm ${
+          theme === 'dark' 
+            ? 'bg-gray-700 text-gray-300 border-b border-gray-600' 
+            : 'bg-gray-50 text-gray-500 border-b border-gray-200'
+        }`}>
+          Draw your signature here
+        </div>
         <canvas
           ref={canvasRef}
-          className="w-full h-40 cursor-crosshair"
+          className="w-full h-48 cursor-crosshair"
           onMouseDown={startDrawing}
           onMouseMove={draw}
           onMouseUp={stopDrawing}
@@ -137,21 +148,29 @@ export function SignatureCanvas({ onSave, initialSignature }: SignatureCanvasPro
         />
       </div>
       
-      <div className="flex space-x-4">
+      <div className="flex space-x-5 w-full justify-center">
         <button
           onClick={clearCanvas}
-          className="flex items-center px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+          className={`flex items-center px-5 py-2.5 rounded-md transition-colors ${
+            theme === 'dark' 
+              ? 'bg-red-900 text-red-300 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2 focus:ring-offset-gray-900' 
+              : 'bg-red-100 text-red-600 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
+          } shadow-sm`}
         >
-          <FaTrash className="mr-2" />
-          Clear
+          <FaTrash className="mr-2 h-4 w-4" />
+          <span className="font-medium">Clear</span>
         </button>
         
         <button
           onClick={saveSignature}
-          className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          className={`flex items-center px-5 py-2.5 text-white rounded-md transition-colors ${
+            theme === 'dark' 
+              ? 'bg-indigo-700 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900' 
+              : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+          } shadow-sm`}
         >
-          <FaSave className="mr-2" />
-          Save
+          <FaSave className="mr-2 h-4 w-4" />
+          <span className="font-medium">Save Signature</span>
         </button>
       </div>
     </div>
