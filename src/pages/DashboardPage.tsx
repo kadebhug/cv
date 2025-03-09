@@ -4,8 +4,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { getUserResumes, deleteResume } from '../services/resumeService';
 import { getUserCoverLetters, deleteCoverLetter } from '../services/coverLetterService';
 import { ResumeData } from '../types/resume';
-import { FaPlus, FaEdit, FaTrash, FaEye, FaFileDownload, FaSpinner, FaBriefcase, FaFileAlt, FaEnvelope, FaCalendarCheck } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaEye, FaFileDownload, FaSpinner, FaBriefcase, FaFileAlt, FaEnvelope, FaCalendarCheck, FaSearch, FaUserTie } from 'react-icons/fa';
 import { ResumePreviewModal } from '../components/ResumePreviewModal';
+import { CoverLetterPreviewModal } from '../components/CoverLetterPreviewModal';
 import { JobSearch } from '../components/JobSearch';
 
 // Cover Letter Data Interface
@@ -29,6 +30,7 @@ export function DashboardPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleteCoverLetterConfirm, setDeleteCoverLetterConfirm] = useState<string | null>(null);
   const [previewResumeId, setPreviewResumeId] = useState<string | null>(null);
+  const [previewCoverLetterId, setPreviewCoverLetterId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'resumes' | 'jobSearch' | 'coverLetters' | 'interviews'>('resumes');
   const { currentUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -103,18 +105,25 @@ export function DashboardPage() {
     setPreviewResumeId(null);
   };
 
+  const handleCoverLetterPreviewClick = (coverId: string) => {
+    setPreviewCoverLetterId(coverId);
+  };
+
+  const closeCoverLetterPreviewModal = () => {
+    setPreviewCoverLetterId(null);
+  };
+
   if (loading && activeTab === 'resumes') {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
-        <FaSpinner className="animate-spin h-10 w-10 text-indigo-600 mb-4" />
-        <p className="text-gray-600">Loading your dashboard...</p>
+        <div className="p-8 flex flex-col items-center">
+          <FaSpinner className="animate-spin h-12 w-12 text-indigo-600 mb-4" />
+          <p className="text-gray-700 font-medium">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
 
-  // ... rest of the component code
-
-  {/* Cover Letters Section */}
   const renderCoverLettersSection = () => {
     if (coverLettersLoading) {
       return (
@@ -127,7 +136,7 @@ export function DashboardPage() {
 
     if (coverLetterError) {
       return (
-        <div className="p-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <div className="p-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
           {coverLetterError}
         </div>
       );
@@ -136,7 +145,9 @@ export function DashboardPage() {
     if (coverLetters.length === 0) {
       return (
         <div className="p-10 text-center">
-          <FaEnvelope className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+          <div className="inline-flex items-center justify-center p-4 rounded-full bg-indigo-100 mb-4">
+            <FaEnvelope className="h-8 w-8 text-indigo-500" />
+          </div>
           <h3 className="text-lg font-medium text-gray-900">No cover letters yet</h3>
           <p className="mt-1 text-sm text-gray-500">
             Create custom cover letters for your job applications.
@@ -144,9 +155,9 @@ export function DashboardPage() {
           <div className="mt-6">
             <Link
               to="/create-cover-letter"
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
             >
-              <FaPlus className="-ml-1 mr-2 h-5 w-5" />
+              <FaPlus className="-ml-1 mr-2 h-4 w-4" />
               Create Cover Letter
             </Link>
           </div>
@@ -160,52 +171,58 @@ export function DashboardPage() {
           {coverLetters.map((letter) => (
             <div
               key={letter.id}
-              className="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200"
+              className="border border-gray-200 rounded-lg overflow-hidden hover:border-indigo-300 transition-colors duration-300"
             >
-              <div className="px-4 py-5 sm:px-6">
-                <h3 className="text-lg font-medium text-gray-900 truncate">
+              <div className="px-4 py-5 sm:px-6 bg-white border-b border-gray-200">
+                <h3 className="text-lg font-medium text-indigo-700 truncate">
                   {letter.name}
                 </h3>
                 <p className="mt-1 text-sm text-gray-500 truncate">
                   {letter.position} at {letter.recipientCompany}
                 </p>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-xs text-gray-400">
                   Last updated: {letter.updatedAt?.toLocaleDateString() || 'N/A'}
                 </p>
               </div>
-              <div className="px-4 py-4 sm:px-6">
+              <div className="px-4 py-4 sm:px-6 bg-gray-50">
                 <div className="flex justify-between space-x-3">
                   <Link
                     to={`/edit-cover-letter/${letter.id}`}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-200 rounded-lg text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300"
                   >
-                    <FaEdit className="-ml-0.5 mr-2 h-4 w-4" />
+                    <FaEdit className="mr-2 h-4 w-4" />
                     Edit
                   </Link>
                   <button
-                    onClick={() => letter.id && setDeleteCoverLetterConfirm(letter.id)}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    onClick={() => letter.id && handleCoverLetterPreviewClick(letter.id)}
+                    className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-200 rounded-lg text-purple-600 hover:bg-purple-50 hover:border-purple-200 transition-all duration-300"
                   >
-                    <FaTrash className="-ml-0.5 mr-2 h-4 w-4" />
-                    Delete
+                    <FaEye className="mr-2 h-4 w-4" />
+                    Preview
+                  </button>
+                  <button
+                    onClick={() => letter.id && setDeleteCoverLetterConfirm(letter.id)}
+                    className="inline-flex items-center justify-center p-2 bg-white border border-gray-200 rounded-lg text-red-600 hover:bg-red-50 hover:border-red-200 transition-all duration-300"
+                  >
+                    <FaTrash className="h-4 w-4" />
                   </button>
                 </div>
                 
                 {deleteCoverLetterConfirm === letter.id && (
-                  <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
+                  <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
                     <p className="text-sm text-red-700 mb-3">
                       Are you sure you want to delete this cover letter? This action cannot be undone.
                     </p>
                     <div className="flex space-x-3">
                       <button
                         onClick={() => letter.id && handleDeleteCoverLetter(letter.id)}
-                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 transition-all duration-300"
                       >
                         Confirm Delete
                       </button>
                       <button
                         onClick={() => setDeleteCoverLetterConfirm(null)}
-                        className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300"
                       >
                         Cancel
                       </button>
@@ -229,260 +246,305 @@ export function DashboardPage() {
         />
       )}
 
+      {previewCoverLetterId && (
+        <CoverLetterPreviewModal
+          coverId={previewCoverLetterId}
+          onClose={closeCoverLetterPreviewModal}
+        />
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Welcome Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Dashboard</h1>
+          <div className="flex flex-col md:flex-row justify-between md:items-center mb-6">
+            <h1 className="text-3xl font-bold text-gray-800 mb-4 md:mb-0">
+              Welcome to your Dashboard
+            </h1>
+            <div className="flex space-x-3">
+              <button className="px-4 py-2 bg-white hover:bg-gray-100 rounded-lg text-gray-700 border border-gray-200 transition-all duration-300 flex items-center">
+                <FaSearch className="mr-2 h-4 w-4 text-indigo-500" />
+                <span>Search</span>
+              </button>
+              <Link
+                to="/create-resume"
+                className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300 flex items-center"
+              >
+                <FaPlus className="mr-2 h-3 w-3" />
+                <span>Create Resume</span>
+              </Link>
+            </div>
+          </div>
           
+          {/* User welcome card */}
+          <div className="w-full mb-8 bg-indigo-600 rounded-lg">
+            <div className="px-6 py-8 flex flex-col md:flex-row md:items-center">
+              <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-8">
+                <div className="w-16 h-16 rounded-full bg-indigo-700 flex items-center justify-center text-white">
+                  <FaUserTie className="h-8 w-8" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-white mb-1">
+                  {currentUser?.email ? currentUser.email.split('@')[0] : 'User'}
+                </h2>
+                <p className="text-indigo-100 mb-4">
+                  Build your professional career with our tools
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <div className="px-3 py-1 bg-indigo-700 rounded-full text-xs text-white">
+                    {resumes.length} {resumes.length === 1 ? 'Resume' : 'Resumes'}
+                  </div>
+                  <div className="px-3 py-1 bg-indigo-700 rounded-full text-xs text-white">
+                    {coverLetters.length} {coverLetters.length === 1 ? 'Cover Letter' : 'Cover Letters'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="bg-white border border-gray-200 rounded-lg">
           {/* Dashboard Tabs */}
           <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
+            <nav className="flex flex-wrap">
               <button
                 onClick={() => setActiveTab('resumes')}
-                className={`${
+                className={`py-4 px-6 font-medium text-sm flex items-center justify-center transition-all duration-300 border-b-2 ${
                   activeTab === 'resumes'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-600 hover:text-indigo-600 hover:border-indigo-300'
+                }`}
               >
-                <FaFileAlt className="mr-2" />
+                <FaFileAlt className="mr-2 h-4 w-4" />
                 Resumes
               </button>
               <button
                 onClick={() => setActiveTab('jobSearch')}
-                className={`${
+                className={`py-4 px-6 font-medium text-sm flex items-center justify-center transition-all duration-300 border-b-2 ${
                   activeTab === 'jobSearch'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-600 hover:text-indigo-600 hover:border-indigo-300'
+                }`}
               >
-                <FaBriefcase className="mr-2" />
+                <FaBriefcase className="mr-2 h-4 w-4" />
                 Job Search
               </button>
               <button
                 onClick={() => setActiveTab('coverLetters')}
-                className={`${
+                className={`py-4 px-6 font-medium text-sm flex items-center justify-center transition-all duration-300 border-b-2 ${
                   activeTab === 'coverLetters'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-600 hover:text-indigo-600 hover:border-indigo-300'
+                }`}
               >
-                <FaEnvelope className="mr-2" />
+                <FaEnvelope className="mr-2 h-4 w-4" />
                 Cover Letters
               </button>
               <button
                 onClick={() => setActiveTab('interviews')}
-                className={`${
+                className={`py-4 px-6 font-medium text-sm flex items-center justify-center transition-all duration-300 border-b-2 ${
                   activeTab === 'interviews'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-600 hover:text-indigo-600 hover:border-indigo-300'
+                }`}
               >
-                <FaCalendarCheck className="mr-2" />
+                <FaCalendarCheck className="mr-2 h-4 w-4" />
                 Interviews
               </button>
             </nav>
           </div>
-        </div>
 
-        {error && activeTab === 'resumes' && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-
-        {/* Resumes Section */}
-        {activeTab === 'resumes' && (
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div className="p-4 border-b border-gray-200 sm:px-6 flex justify-between items-center">
-              <h2 className="text-xl font-medium text-gray-900">My Resumes</h2>
-              <Link
-                to="/create-resume"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <FaPlus className="-ml-1 mr-2 h-5 w-5" />
-                Create New Resume
-              </Link>
+          {error && activeTab === 'resumes' && (
+            <div className="m-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {error}
             </div>
-            
-            {resumes.length === 0 ? (
-              <div className="p-10 text-center">
-                <div className="mb-4">
-                  <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">No resumes yet</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Get started by creating a new resume.
-                </p>
-                <div className="mt-6">
-                  <Link
-                    to="/create-resume"
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    <FaPlus className="-ml-1 mr-2 h-5 w-5" />
-                    Create New Resume
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 sm:px-6">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {resumes.map((resume) => (
-                    <div
-                      key={resume.id}
-                      className="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200"
-                    >
-                      <div className="px-4 py-5 sm:px-6">
-                        <h3 className="text-lg font-medium text-gray-900 truncate">
-                          {resume.name || `${resume.personal?.firstName || ''} ${resume.personal?.lastName || ''}'s Resume`}
-                        </h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                          Last updated: {resume.updatedAt?.toLocaleDateString() || 'N/A'}
-                        </p>
-                      </div>
-                      <div className="px-4 py-4 sm:px-6">
-                        <div className="flex justify-between space-x-3">
-                          <Link
-                            to={`/edit/${resume.id}`}
-                            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                          >
-                            <FaEdit className="-ml-0.5 mr-2 h-4 w-4" />
-                            Edit
-                          </Link>
-                          <button
-                            onClick={() => resume.id && handlePreviewClick(resume.id)}
-                            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                          >
-                            <FaEye className="-ml-0.5 mr-2 h-4 w-4" />
-                            Preview
-                          </button>
-                          <button
-                            onClick={() => resume.id && setDeleteConfirm(resume.id)}
-                            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                          >
-                            <FaTrash className="-ml-0.5 mr-2 h-4 w-4" />
-                            Delete
-                          </button>
-                        </div>
-                        
-                        {deleteConfirm === resume.id && (
-                          <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
-                            <p className="text-sm text-red-700 mb-3">
-                              Are you sure you want to delete this resume? This action cannot be undone.
-                            </p>
-                            <div className="flex space-x-3">
-                              <button
-                                onClick={() => resume.id && handleDeleteResume(resume.id)}
-                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                              >
-                                Confirm Delete
-                              </button>
-                              <button
-                                onClick={() => setDeleteConfirm(null)}
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          )}
 
-        {/* Job Search Section */}
-        {activeTab === 'jobSearch' && (
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div className="p-4 border-b border-gray-200 sm:px-6">
-              <h2 className="text-xl font-medium text-gray-900">Job Search</h2>
-              <p className="mt-1 text-sm text-gray-500">
-                Find and apply for jobs that match your skills and experience
-              </p>
-            </div>
-            <div className="p-4 sm:p-6">
-              {resumes.length > 0 ? (
-                <JobSearch resumeData={resumes[0]} />
-              ) : (
-                <div className="text-center py-8">
-                  <FaBriefcase className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                  <h3 className="text-lg font-medium text-gray-900">No resume found</h3>
+          {/* Resumes Section */}
+          {activeTab === 'resumes' && (
+            <div>
+              <div className="p-5 border-b border-gray-200 flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-800">My Resumes</h2>
+                <Link
+                  to="/create-resume"
+                  className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
+                >
+                  <FaPlus className="-ml-1 mr-2 h-4 w-4" />
+                  Create New Resume
+                </Link>
+              </div>
+              
+              {resumes.length === 0 ? (
+                <div className="p-10 text-center">
+                  <div className="inline-flex items-center justify-center p-4 rounded-full bg-indigo-100 mb-4">
+                    <FaFileAlt className="h-8 w-8 text-indigo-500" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900">No resumes yet</h3>
                   <p className="mt-1 text-sm text-gray-500">
-                    You need to create a resume before you can search for jobs.
+                    Get started by creating a new resume.
                   </p>
                   <div className="mt-6">
                     <Link
                       to="/create-resume"
-                      className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
                     >
-                      <FaPlus className="-ml-1 mr-2 h-5 w-5" />
+                      <FaPlus className="-ml-1 mr-2 h-4 w-4" />
                       Create New Resume
                     </Link>
                   </div>
                 </div>
+              ) : (
+                <div className="p-6">
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {resumes.map((resume) => (
+                      <div
+                        key={resume.id}
+                        className="border border-gray-200 rounded-lg overflow-hidden hover:border-indigo-300 transition-colors duration-300"
+                      >
+                        <div className="px-4 py-5 sm:px-6 bg-white border-b border-gray-200">
+                          <h3 className="text-lg font-medium text-indigo-700 truncate">
+                            {resume.name || `${resume.personal?.firstName || ''} ${resume.personal?.lastName || ''}'s Resume`}
+                          </h3>
+                          <p className="mt-1 text-xs text-gray-500">
+                            Last updated: {resume.updatedAt?.toLocaleDateString() || 'N/A'}
+                          </p>
+                        </div>
+                        <div className="px-4 py-4 sm:px-6 bg-gray-50">
+                          <div className="flex justify-between space-x-3">
+                            <Link
+                              to={`/edit/${resume.id}`}
+                              className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-200 rounded-lg text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300"
+                            >
+                              <FaEdit className="mr-2 h-4 w-4" />
+                              Edit
+                            </Link>
+                            <button
+                              onClick={() => resume.id && handlePreviewClick(resume.id)}
+                              className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-200 rounded-lg text-purple-600 hover:bg-purple-50 hover:border-purple-200 transition-all duration-300"
+                            >
+                              <FaEye className="mr-2 h-4 w-4" />
+                              Preview
+                            </button>
+                            <button
+                              onClick={() => resume.id && setDeleteConfirm(resume.id)}
+                              className="inline-flex items-center justify-center p-2 bg-white border border-gray-200 rounded-lg text-red-600 hover:bg-red-50 hover:border-red-200 transition-all duration-300"
+                            >
+                              <FaTrash className="h-4 w-4" />
+                            </button>
+                          </div>
+                          
+                          {deleteConfirm === resume.id && (
+                            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                              <p className="text-sm text-red-700 mb-3">
+                                Are you sure you want to delete this resume? This action cannot be undone.
+                              </p>
+                              <div className="flex space-x-3">
+                                <button
+                                  onClick={() => resume.id && handleDeleteResume(resume.id)}
+                                  className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 transition-all duration-300"
+                                >
+                                  Confirm Delete
+                                </button>
+                                <button
+                                  onClick={() => setDeleteConfirm(null)}
+                                  className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Cover Letters Section */}
-        {activeTab === 'coverLetters' && (
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div className="p-4 border-b border-gray-200 sm:px-6 flex justify-between items-center">
-              <h2 className="text-xl font-medium text-gray-900">Cover Letters</h2>
-              <Link
-                to="/create-cover-letter"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <FaPlus className="-ml-1 mr-2 h-5 w-5" />
-                Create Cover Letter
-              </Link>
+          {/* Job Search Section */}
+          {activeTab === 'jobSearch' && (
+            <div>
+              <div className="p-5 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-800 mb-1">Job Search</h2>
+                <p className="text-sm text-gray-600">
+                  Find and apply for jobs that match your skills and experience
+                </p>
+              </div>
+              <div className="p-6">
+                {resumes.length > 0 ? (
+                  <JobSearch resumeData={resumes[0]} />
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="inline-flex items-center justify-center p-4 rounded-full bg-indigo-100 mb-4">
+                      <FaBriefcase className="h-8 w-8 text-indigo-500" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900">No resume found</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      You need to create a resume before you can search for jobs.
+                    </p>
+                    <div className="mt-6">
+                      <Link
+                        to="/create-resume"
+                        className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
+                      >
+                        <FaPlus className="-ml-1 mr-2 h-4 w-4" />
+                        Create New Resume
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-            {renderCoverLettersSection()}
-          </div>
-        )}
+          )}
 
-        {/* Interviews Section */}
-        {activeTab === 'interviews' && (
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div className="p-4 border-b border-gray-200 sm:px-6 flex justify-between items-center">
-              <h2 className="text-xl font-medium text-gray-900">Interviews</h2>
-              <Link
-                to="/create-resume"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <FaPlus className="-ml-1 mr-2 h-5 w-5" />
-                Schedule Interview
-              </Link>
+          {/* Cover Letters Section */}
+          {activeTab === 'coverLetters' && (
+            <div>
+              <div className="p-5 border-b border-gray-200 flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-800">Cover Letters</h2>
+                <Link
+                  to="/create-cover-letter"
+                  className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
+                >
+                  <FaPlus className="-ml-1 mr-2 h-4 w-4" />
+                  Create Cover Letter
+                </Link>
+              </div>
+              {renderCoverLettersSection()}
             </div>
-            <div className="p-10 text-center">
-              <FaCalendarCheck className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-              <h3 className="text-lg font-medium text-gray-900">No interviews scheduled</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Track and prepare for your upcoming interviews.
-              </p>
-              <p className="mt-2 text-sm text-gray-500">
-                Coming soon! This feature is under development.
-              </p>
+          )}
+
+          {/* Interviews Section */}
+          {activeTab === 'interviews' && (
+            <div>
+              <div className="p-5 border-b border-gray-200 flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-800">Interviews</h2>
+                <Link
+                  to="/create-resume"
+                  className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
+                >
+                  <FaPlus className="-ml-1 mr-2 h-4 w-4" />
+                  Schedule Interview
+                </Link>
+              </div>
+              <div className="p-10 text-center">
+                <div className="inline-flex items-center justify-center p-4 rounded-full bg-indigo-100 mb-4">
+                  <FaCalendarCheck className="h-8 w-8 text-indigo-500" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900">No interviews scheduled</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Track and prepare for your upcoming interviews.
+                </p>
+                <p className="mt-2 text-sm text-gray-500">
+                  Coming soon! This feature is under development.
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
