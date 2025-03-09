@@ -30,8 +30,11 @@ jobs:
           node-version: '22.14.0'
           cache: 'npm'
           
-      - name: Install dependencies
-        run: npm ci
+      - name: Clean install dependencies
+        run: |
+          rm -rf node_modules
+          rm -f package-lock.json
+          npm install --no-optional
         
       - name: Debug Environment Variables
         run: |
@@ -56,7 +59,7 @@ jobs:
           cat .env.production | grep -v "API_KEY"  # Print env file for debugging (without API key)
         
       - name: Build
-        run: npm run build
+        run: npm run build:ci
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
