@@ -463,15 +463,17 @@ export function ResumeBuilder() {
                   <button
                     key={section.id}
                     onClick={() => handleSectionSelect(section.id)}
-                    className={`w-full flex items-center ${sidebarCollapsed && !isMobile ? 'justify-center' : 'px-3'} py-2.5 text-sm font-medium rounded-md transition-colors ${
+                    className={`w-full flex items-start ${sidebarCollapsed && !isMobile ? 'justify-center' : 'px-3'} py-2.5 text-sm font-medium rounded-md transition-colors ${
                       activeSection === section.id
                         ? 'bg-blue-50 text-blue-700'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                     title={sidebarCollapsed && !isMobile ? section.title : ''}
                   >
-                    <section.icon className={`${sidebarCollapsed && !isMobile ? 'mr-0' : 'mr-3'} h-5 w-5`} />
-                    {(!sidebarCollapsed || isMobile) && section.title}
+                    <section.icon className={`${sidebarCollapsed && !isMobile ? 'mr-0' : 'mr-3'} h-5 w-5 ${!sidebarCollapsed && 'mt-0.5'}`} />
+                    {(!sidebarCollapsed || isMobile) && (
+                      <span className="text-left">{section.title}</span>
+                    )}
                   </button>
                 ))}
               </nav>
