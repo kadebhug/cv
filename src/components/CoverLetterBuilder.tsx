@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FaChevronLeft, FaSave, FaDownload, FaSpinner } from 'react-icons/fa';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { saveCoverLetter, getCoverLetter } from '../services/coverLetterService';
 import { FirebaseError } from 'firebase/app';
+import { SignatureSelector } from './SignatureSelector';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface CoverLetterData {
   id?: string;
@@ -44,12 +46,14 @@ export function CoverLetterBuilder() {
   const { coverId } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [signatureImage, setSignatureImage] = useState<string>('');
   
-  const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm<CoverLetterData>({
+  const { register, handleSubmit, reset, control, formState: { errors, isDirty }, setValue, watch } = useForm<CoverLetterData>({
     defaultValues: {
       name: '',
       recipientName: '',
@@ -63,6 +67,9 @@ export function CoverLetterBuilder() {
       userId: currentUser?.uid || ''
     }
   });
+
+  // Watch the signature field
+  const signatureValue = watch('signature');
   
   useEffect(() => {
     // Load existing cover letter if editing
@@ -74,6 +81,11 @@ export function CoverLetterBuilder() {
           if (coverLetterData && coverLetterData.userId === currentUser.uid) {
             console.log('Loaded cover letter:', coverLetterData);
             reset(coverLetterData);
+            
+            // If there's a signature image URL in the signature field, set it
+            if (coverLetterData.signature && coverLetterData.signature.startsWith('data:image')) {
+              setSignatureImage(coverLetterData.signature);
+            }
           } else {
             console.error('Cover letter not found or unauthorized');
             navigate('/dashboard');
@@ -89,6 +101,12 @@ export function CoverLetterBuilder() {
       loadCoverLetter();
     }
   }, [coverId, currentUser, navigate, reset]);
+
+  // Handle signature change
+  const handleSignatureChange = (value: string) => {
+    setSignatureImage(value);
+    setValue('signature', value, { shouldDirty: true });
+  };
   
   const onSubmit = async (data: CoverLetterData) => {
     if (!currentUser) {
@@ -142,7 +160,7 @@ export function CoverLetterBuilder() {
   }
   
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div className={`max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 ${theme === 'dark' ? 'bg-gray-900 text-white' : ''}`}>
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center">
           <button
@@ -158,7 +176,7 @@ export function CoverLetterBuilder() {
         <button
           onClick={handleSubmit(onSubmit)}
           disabled={saving || !isDirty}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${theme === 'dark' ? 'bg-indigo-700 hover:bg-indigo-800' : 'bg-indigo-600 hover:bg-indigo-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50`}
         >
           {saving ? (
             <>
@@ -296,15 +314,15 @@ export function CoverLetterBuilder() {
           </div>
         </div>
         
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:px-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">Cover Letter Content</h3>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">Write your cover letter content here.</p>
+        <div className={`bg-white shadow overflow-hidden sm:rounded-md ${theme === 'dark' ? 'bg-gray-800 text-white' : ''}`}>
+          <div className={`px-4 py-5 sm:px-6 ${theme === 'dark' ? 'border-b border-gray-700' : ''}`}>
+            <h3 className={`text-lg leading-6 font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Cover Letter Content</h3>
+            <p className={`mt-1 max-w-2xl text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>Write your cover letter content here.</p>
           </div>
-          <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
+          <div className={`${theme === 'dark' ? 'border-t border-gray-700' : 'border-t border-gray-200'} px-4 py-5 sm:p-6`}>
             <div className="grid grid-cols-1 gap-y-6">
               <div>
-                <label htmlFor="introduction" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="introduction" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                   Introduction
                 </label>
                 <div className="mt-1">
@@ -319,13 +337,13 @@ export function CoverLetterBuilder() {
                     <p className="mt-1 text-sm text-red-600">{errors.introduction.message}</p>
                   )}
                 </div>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                   Introduce yourself and state the position you're applying for.
                 </p>
               </div>
               
               <div>
-                <label htmlFor="body" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="body" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                   Body
                 </label>
                 <div className="mt-1">
@@ -340,13 +358,13 @@ export function CoverLetterBuilder() {
                     <p className="mt-1 text-sm text-red-600">{errors.body.message}</p>
                   )}
                 </div>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                   Highlight your relevant experience, skills, and achievements.
                 </p>
               </div>
               
               <div>
-                <label htmlFor="conclusion" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="conclusion" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                   Conclusion
                 </label>
                 <div className="mt-1">
@@ -361,27 +379,34 @@ export function CoverLetterBuilder() {
                     <p className="mt-1 text-sm text-red-600">{errors.conclusion.message}</p>
                   )}
                 </div>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                   Conclude with a call to action and express your interest in an interview.
                 </p>
               </div>
               
               <div>
-                <label htmlFor="signature" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="signature" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                   Signature
                 </label>
                 <div className="mt-1">
-                  <input
-                    type="text"
-                    id="signature"
-                    className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md ${errors.signature ? 'border-red-300' : ''}`}
-                    placeholder="Sincerely, John Doe"
-                    {...register('signature', { required: 'Signature is required' })}
+                  <Controller
+                    name="signature"
+                    control={control}
+                    rules={{ required: 'Signature is required' }}
+                    render={({ field }) => (
+                      <SignatureSelector
+                        value={signatureImage}
+                        onChange={handleSignatureChange}
+                      />
+                    )}
                   />
                   {errors.signature && (
                     <p className="mt-1 text-sm text-red-600">{errors.signature.message}</p>
                   )}
                 </div>
+                <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Draw or select your signature. This will appear at the bottom of your cover letter.
+                </p>
               </div>
             </div>
           </div>
@@ -391,7 +416,7 @@ export function CoverLetterBuilder() {
           <button
             type="submit"
             disabled={saving || !isDirty}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${theme === 'dark' ? 'bg-indigo-700 hover:bg-indigo-800' : 'bg-indigo-600 hover:bg-indigo-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50`}
           >
             {saving ? (
               <>

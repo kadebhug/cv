@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { FaTimes, FaDownload, FaSpinner } from 'react-icons/fa';
 import { getCoverLetter } from '../services/coverLetterService';
-import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, pdf, Image } from '@react-pdf/renderer';
+import { useAuth } from '../contexts/AuthContext';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../services/firebase';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface CoverLetterPreviewModalProps {
   coverId: string;
@@ -95,10 +99,20 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     color: '#555555',
   },
+  signatureImage: {
+    marginTop: 40,
+    marginBottom: 4,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+  },
 });
 
 // PDF Document component
-const CoverLetterPDF = ({ coverLetter, formattedDate }: { coverLetter: CoverLetterData, formattedDate: string }) => {
+const CoverLetterPDF = ({ coverLetter, formattedDate, userSignature }: { 
+  coverLetter: CoverLetterData, 
+  formattedDate: string,
+  userSignature?: string | null
+}) => {
   // Split body text into paragraphs and identify bullet points
   const bodyParagraphs = coverLetter.body.split('\n').map(paragraph => {
     // Check if paragraph starts with a bullet point marker
@@ -171,10 +185,16 @@ const CoverLetterPDF = ({ coverLetter, formattedDate }: { coverLetter: CoverLett
           <Text>{coverLetter.conclusion}</Text>
         </View>
 
-        {/* Closing */}
+        {/* Signature */}
         <View style={styles.closing}>
           <Text>Sincerely,</Text>
-          <Text style={styles.signature}>{name}</Text>
+          {userSignature ? (
+            <View style={styles.signatureImage}>
+              <Image src={userSignature} style={{ width: 150, height: 50 }} />
+            </View>
+          ) : (
+            <Text style={styles.signature}>{name}</Text>
+          )}
           <Text style={styles.enclosure}>Enclosure: Resume</Text>
         </View>
       </Page>
@@ -183,10 +203,13 @@ const CoverLetterPDF = ({ coverLetter, formattedDate }: { coverLetter: CoverLett
 };
 
 export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreviewModalProps) {
+  const { currentUser } = useAuth();
+  const { theme } = useTheme();
   const [coverLetter, setCoverLetter] = useState<CoverLetterData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [userSignature, setUserSignature] = useState<string | null>(null);
 
   useEffect(() => {
     const loadCoverLetter = async () => {
@@ -194,6 +217,14 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
         setLoading(true);
         const data = await getCoverLetter(coverId);
         setCoverLetter(data);
+        
+        // Check if the signature field contains an image URL
+        if (data && data.signature && data.signature.startsWith('data:image')) {
+          setUserSignature(data.signature);
+        } else {
+          // If not, try to load the user's signature from Firestore
+          loadUserSignature();
+        }
       } catch (error) {
         console.error('Error loading cover letter:', error);
         setError('Failed to load cover letter. Please try again.');
@@ -204,6 +235,25 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
 
     loadCoverLetter();
   }, [coverId]);
+
+  // Load user's signature from Firestore
+  const loadUserSignature = async () => {
+    if (!currentUser) return;
+    
+    try {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.signature) {
+          setUserSignature(userData.signature);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user signature:', error);
+    }
+  };
 
   // Close modal when clicking outside
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -228,7 +278,11 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
       
       // Create PDF blob
       const blob = await pdf(
-        <CoverLetterPDF coverLetter={coverLetter} formattedDate={formattedDate} />
+        <CoverLetterPDF 
+          coverLetter={coverLetter} 
+          formattedDate={formattedDate}
+          userSignature={userSignature}
+        />
       ).toBlob();
       
       // Create download link
@@ -250,6 +304,12 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
 
   // Extract name from signature
   const extractName = (signature: string) => {
+    // If the signature is an image URL, extract the name from the cover letter data
+    if (signature && signature.startsWith('data:image')) {
+      return coverLetter?.name?.split(' ')[0] || '[Your Name]';
+    }
+    
+    // Otherwise, extract from text signature
     if (!signature) return '[Your Name]';
     const parts = signature.split(',');
     return parts.length > 1 ? parts[1].trim() : parts[0].trim();
@@ -257,17 +317,17 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 ${theme === 'dark' ? 'dark' : ''}`}
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-          <h2 className="text-xl font-semibold text-gray-800">
+      <div className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white'} rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col`}>
+        <div className={`p-4 border-b ${theme === 'dark' ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-gray-50'} flex justify-between items-center`}>
+          <h2 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
             {loading ? 'Loading Cover Letter...' : coverLetter?.name || 'Cover Letter Preview'}
           </h2>
           <div className="flex space-x-2">
             <button
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+              className={`p-2 rounded-lg ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} transition-colors`}
               onClick={onClose}
             >
               <FaTimes />
@@ -278,15 +338,15 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
         <div className="overflow-auto flex-1 p-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-64">
-              <FaSpinner className="animate-spin h-8 w-8 text-indigo-600 mb-4" />
-              <p className="text-gray-600">Loading cover letter...</p>
+              <FaSpinner className={`animate-spin h-8 w-8 ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'} mb-4`} />
+              <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Loading cover letter...</p>
             </div>
           ) : error ? (
-            <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+            <div className={`${theme === 'dark' ? 'bg-red-900 border-red-800 text-red-200' : 'bg-red-50 border-red-200 text-red-700'} p-4 rounded-lg border`}>
               {error}
             </div>
           ) : coverLetter ? (
-            <div className="max-w-3xl mx-auto p-8 border border-gray-200 bg-white shadow-sm">
+            <div className={`max-w-3xl mx-auto p-8 border ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'} shadow-sm`}>
               {/* Preview of the cover letter in HTML format */}
               <div className="mb-8 pb-4 border-b border-gray-200">
                 <h1 className="text-2xl font-bold uppercase text-gray-800">{extractName(coverLetter.signature)}</h1>
@@ -332,22 +392,30 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
               <div className="mt-8">
                 <p>Sincerely,</p>
                 <div className="mt-10 mb-1">
-                  <p className="font-semibold text-gray-800">{extractName(coverLetter.signature)}</p>
+                  {userSignature ? (
+                    <img src={userSignature} alt="Your signature" className="max-h-16" />
+                  ) : (
+                    <p className={`font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                      {extractName(coverLetter.signature)}
+                    </p>
+                  )}
                 </div>
-                <p className="text-sm text-gray-600 italic">Enclosure: Resume</p>
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} italic`}>
+                  Enclosure: Resume
+                </p>
               </div>
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">No cover letter found.</p>
+              <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>No cover letter found.</p>
             </div>
           )}
         </div>
         
-        <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-end">
+        <div className={`p-4 border-t ${theme === 'dark' ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-gray-50'} flex justify-end`}>
           <button
             onClick={handleDownloadPDF}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center"
+            className={`px-4 py-2 ${theme === 'dark' ? 'bg-indigo-700 hover:bg-indigo-800' : 'bg-indigo-600 hover:bg-indigo-700'} text-white rounded-lg transition-colors flex items-center`}
             disabled={loading || !coverLetter || generatingPDF}
           >
             {generatingPDF ? (
