@@ -256,24 +256,6 @@ export function DashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Welcome Header */}
         <div className="mb-8">
-          <div className="flex flex-col md:flex-row justify-between md:items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4 md:mb-0">
-              Welcome to your Dashboard
-            </h1>
-            <div className="flex space-x-3">
-              <button className="px-4 py-2 bg-white hover:bg-gray-100 rounded-lg text-gray-700 border border-gray-200 transition-all duration-300 flex items-center">
-                <FaSearch className="mr-2 h-4 w-4 text-indigo-500" />
-                <span>Search</span>
-              </button>
-              <Link
-                to="/create-resume"
-                className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300 flex items-center"
-              >
-                <FaPlus className="mr-2 h-3 w-3" />
-                <span>Create Resume</span>
-              </Link>
-            </div>
-          </div>
           
           {/* User welcome card */}
           <div className="w-full mb-8 bg-indigo-600 rounded-lg">

@@ -87,14 +87,6 @@ export function Navbar() {
                     </div>
                     <span className="hidden sm:inline text-sm font-medium">Sign Out</span>
                   </button>
-                  
-                  <Link
-                    to="/create-resume"
-                    className={`ml-2 px-4 py-2 rounded-lg ${theme === 'dark' ? 'bg-indigo-700 hover:bg-indigo-800' : 'bg-indigo-600 hover:bg-indigo-700'} text-white transition-all duration-300 flex items-center`}
-                  >
-                    <FaPlus className="mr-2 h-3 w-3" />
-                    <span className="text-sm font-medium">Create</span>
-                  </Link>
                 </>
               ) : (
                 <Link
@@ -108,23 +100,12 @@ export function Navbar() {
                   <span className="hidden sm:inline text-sm font-medium">Sign In</span>
                 </Link>
               )}
-              
-              <a 
-                href="https://github.com/kadeesterline/resume-builder" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className={`p-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'} transition-all duration-300`}
-                title="View on GitHub"
-              >
-                <FaGithub className="h-5 w-5" />
-              </a>
             </div>
           </div>
         </div>
       </nav>
-      
-      {/* Color accent line under the navbar */}
-      <div className="h-1 bg-indigo-600"></div>
+    
+      <div className="h-0.5 bg-indigo-600"></div>
     </div>
   )
 } 
