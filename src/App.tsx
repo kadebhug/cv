@@ -1,4 +1,4 @@
-import { HashRouter as Router, Routes, Route } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { LandingPage } from './pages/LandingPage'
 import { ResumeBuilder } from './components/ResumeBuilder'
 import { Navbar } from './components/Navbar'
@@ -9,6 +9,7 @@ import { RegisterPage } from './pages/RegisterPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { CoverLetterBuilder } from './components/CoverLetterBuilder'
 
 // Register a web-safe font
 Font.register({
@@ -39,17 +40,26 @@ function App() {
                   <ResumeBuilder />
                 </main>
               } />
-              <Route path="/" element={
+              <Route path="/create-resume" element={
                 <main className="flex-1 w-full">
                   <ResumeBuilder />
                 </main>
               } />
-              {/* Redirect any other routes to the root */}
-              <Route path="*" element={
+              {/* Cover Letter Routes */}
+              <Route path="/create-cover-letter" element={
                 <main className="flex-1 w-full">
-                  <ResumeBuilder />
+                  <CoverLetterBuilder />
                 </main>
               } />
+              <Route path="/edit-cover-letter/:coverId" element={
+                <main className="flex-1 w-full">
+                  <CoverLetterBuilder />
+                </main>
+              } />
+              {/* Root path redirects to dashboard */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              {/* Redirect any other routes to the dashboard */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Routes>
         </div>

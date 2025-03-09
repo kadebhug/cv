@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { FaFileAlt, FaGithub, FaHome, FaInfoCircle, FaUser, FaSignOutAlt } from 'react-icons/fa'
+import { FaFileAlt, FaGithub, FaHome, FaInfoCircle, FaUser, FaSignOutAlt, FaPlus } from 'react-icons/fa'
 import { useAuth } from '../contexts/AuthContext'
 import { signOut } from '../services/authService'
 import { useState } from 'react'
@@ -71,22 +71,7 @@ export function Navbar() {
                 <span className="hidden sm:inline">Sign In</span>
               </Link>
             )}
-            
-            <a 
-              href="https://github.com/kadeesterline/resume-builder" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-gray-500 hover:text-gray-700 transition-colors"
-              title="View on GitHub"
-            >
-              <FaGithub className="h-5 w-5" />
-            </a>
-            <Link
-              to="/"
-              className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
-            >
-              Create Resume
-            </Link>
+          
           </div>
         </div>
       </div>

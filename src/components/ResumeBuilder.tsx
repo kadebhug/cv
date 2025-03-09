@@ -9,7 +9,6 @@ import { FaUser, FaFileAlt, FaBriefcase, FaGraduationCap, FaTools, FaLink, FaPuz
 import { ResumeFeedback } from './ResumeFeedback'
 import { ATSOptimizer } from './ATSOptimizer'
 import { TemplateSelector } from './TemplateSelector'
-import { JobSearch } from './JobSearch'
 import { LinkedInImport } from './LinkedInImport'
 import { useAuth } from '../contexts/AuthContext'
 import { saveResume, updateResume, getResume } from '../services/resumeService'
@@ -25,7 +24,7 @@ const sections = [
   { id: 'custom', title: 'Custom Sections', icon: FaPuzzlePiece, description: 'Add custom sections to your resume' },
   { id: 'hobbies', title: 'Hobbies', icon: FaHeart, description: 'Your interests and activities' },
   { id: 'feedback', title: 'Feedback & Optimization', icon: FaLightbulb, description: 'Get feedback and optimize your resume' },
-  { id: 'jobs', title: 'Job Search', icon: FaBriefcase, description: 'Search and apply for jobs with your resume' },
+  { id: 'linkedin', title: 'LinkedIn Import', icon: FaLinkedin, description: 'Import your profile from LinkedIn' },
 ] as const
 
 // Available templates
@@ -155,7 +154,6 @@ export function ResumeBuilder() {
   const [jobDescription, setJobDescription] = useState<string>('');
   const [feedbackTab, setFeedbackTab] = useState<'feedback' | 'ats'>('feedback');
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
-  const [jobTab, setJobTab] = useState<'search' | 'import'>('search');
   
   // Initialize with empty values that match the ResumeData structure
   const [formData, setFormData] = useState<Partial<ResumeData>>({
@@ -309,12 +307,15 @@ export function ResumeBuilder() {
       ...linkedInData,
       personal: {
         ...formData.personal,
-        ...linkedInData.personal,
-      },
+        ...linkedInData.personal
+      }
     };
     
-    // Update form with merged data
+    // Update form data with LinkedIn data
     methods.reset(mergedData as ResumeData);
+    
+    // Notify the user and navigate to the personal section to review imported data
+    setActiveSection('personal');
   };
 
   // Load resume if editing an existing one
@@ -610,7 +611,7 @@ export function ResumeBuilder() {
                 {/* Form Section */}
                 <div className="space-y-6">
                   <FormProvider {...methods}>
-                    {activeSection !== 'feedback' && activeSection !== 'jobs' ? (
+                    {activeSection !== 'feedback' && activeSection !== 'linkedin' ? (
                       <div className="space-y-4">
                         <div className="bg-white shadow-sm rounded-lg p-6">
                           <div className="mb-4">
@@ -732,63 +733,17 @@ export function ResumeBuilder() {
                         )}
                       </div>
                     ) : (
-                      // Job Search Section
-                      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-                        <div className="flex border-b">
-                          <button
-                            className={`flex-1 py-3 px-4 text-center font-medium ${
-                              jobTab === 'search'
-                                ? 'text-blue-600 border-b-2 border-blue-600'
-                                : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                            onClick={() => setJobTab('search')}
-                          >
-                            <FaBriefcase className="inline-block mr-2" />
-                            Job Search
-                          </button>
-                          <button
-                            className={`flex-1 py-3 px-4 text-center font-medium ${
-                              jobTab === 'import'
-                                ? 'text-blue-600 border-b-2 border-blue-600'
-                                : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                            onClick={() => setJobTab('import')}
-                          >
-                            <FaLinkedin className="inline-block mr-2" />
+                      // LinkedIn Import Section
+                      <div className="bg-white shadow-sm rounded-lg p-6">
+                        <div className="mb-4">
+                          <h2 className="text-xl font-semibold text-gray-800">
                             LinkedIn Import
-                          </button>
+                          </h2>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Import your profile data from LinkedIn to quickly fill your resume
+                          </p>
                         </div>
-                        
-                        {jobTab === 'search' ? (
-                          <JobSearch 
-                            resumeData={{
-                              personal: formData.personal || {
-                                jobTitle: '',
-                                firstName: '',
-                                lastName: '',
-                                email: '',
-                                phone: '',
-                                country: '',
-                                city: '',
-                                address: '',
-                                postalCode: ''
-                              },
-                              professionalSummary: formData.professionalSummary || '',
-                              experience: Array.isArray(formData.experience) ? formData.experience : [],
-                              education: Array.isArray(formData.education) ? formData.education : [],
-                              skills: Array.isArray(formData.skills) ? formData.skills : [],
-                              socialLinks: Array.isArray(formData.socialLinks) ? formData.socialLinks : [],
-                              courses: Array.isArray(formData.courses) ? formData.courses : [],
-                              hobbies: Array.isArray(formData.hobbies) ? formData.hobbies : [],
-                              certifications: Array.isArray(formData.certifications) ? formData.certifications : [],
-                              projects: Array.isArray(formData.projects) ? formData.projects : [],
-                              organizations: Array.isArray(formData.organizations) ? formData.organizations : [],
-                              customSections: Array.isArray(formData.customSections) ? formData.customSections : []
-                            }}
-                          />
-                        ) : (
-                          <LinkedInImport onImportComplete={handleLinkedInImport} />
-                        )}
+                        <LinkedInImport onImportComplete={handleLinkedInImport} />
                       </div>
                     )}
                   </FormProvider>

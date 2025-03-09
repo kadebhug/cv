@@ -8,7 +8,10 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:firebase": "node scripts/test-firebase.js",
+    "test:firebase:sh": "bash scripts/test-firebase.sh",
+    "deploy:firebase:rules": "bash scripts/deploy-firebase-rules.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -31,6 +34,7 @@
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
+    "dotenv": "^16.3.1",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
