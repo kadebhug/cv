@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FaChevronLeft, FaSave, FaDownload, FaSpinner } from 'react-icons/fa';
+import { FaChevronLeft, FaSave, FaDownload, FaSpinner, FaMagic } from 'react-icons/fa';
 import { useForm, Controller } from 'react-hook-form';
 import { saveCoverLetter, getCoverLetter } from '../services/coverLetterService';
+import { getUserResumes } from '../services/resumeService';
+import { generateCoverLetter } from '../services/geminiService';
 import { FirebaseError } from 'firebase/app';
 import { SignatureSelector } from './SignatureSelector';
 import { useTheme } from '../contexts/ThemeContext';
+import { JobDescriptionModal } from './JobDescriptionModal';
+import { ResumeData, Skill, Experience } from '../types/resume';
 
 interface CoverLetterData {
   id?: string;
@@ -54,8 +58,11 @@ export function CoverLetterBuilder() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [signatureImage, setSignatureImage] = useState<string>('');
+  const [isJobDescriptionModalOpen, setIsJobDescriptionModalOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [userResumes, setUserResumes] = useState<ResumeData[]>([]);
   
-  const { register, handleSubmit, reset, control, formState: { errors, isDirty }, setValue, watch } = useForm<CoverLetterData>({
+  const { register, handleSubmit, reset, control, formState: { errors, isDirty, isValid }, setValue, watch, trigger } = useForm<CoverLetterData>({
     defaultValues: {
       name: '',
       recipientName: '',
@@ -69,12 +76,19 @@ export function CoverLetterBuilder() {
       phone: '',
       email: currentUser?.email || '',
       userId: currentUser?.uid || ''
-    }
+    },
+    mode: 'onTouched'
   });
 
   // Watch the signature field
   const signatureValue = watch('signature');
   
+  // Log form errors when they change
+  useEffect(() => {
+    console.log('Form errors:', errors);
+    console.log('Form state:', { isDirty, isValid });
+  }, [errors, isDirty, isValid]);
+
   useEffect(() => {
     // Load existing cover letter if editing
     if (coverId && currentUser) {
@@ -113,6 +127,20 @@ export function CoverLetterBuilder() {
       
       loadCoverLetter();
     }
+    
+    // Load user resumes to get skills and experience
+    if (currentUser) {
+      const loadUserResumes = async () => {
+        try {
+          const resumes = await getUserResumes(currentUser.uid);
+          setUserResumes(resumes);
+        } catch (error) {
+          console.error('Error loading user resumes:', error);
+        }
+      };
+      
+      loadUserResumes();
+    }
   }, [coverId, currentUser, navigate, reset]);
 
   // Handle signature change
@@ -122,6 +150,8 @@ export function CoverLetterBuilder() {
   };
   
   const onSubmit = async (data: CoverLetterData) => {
+    console.log('Form submission triggered', { data, isDirty, isValid, errors });
+    
     if (!currentUser) {
       setSaveError('You must be logged in to save a cover letter');
       return;
@@ -164,6 +194,116 @@ export function CoverLetterBuilder() {
     }
   };
   
+  // Handle job description submission
+  const handleJobDescriptionSubmit = async (jobDescription: string) => {
+    if (!currentUser) {
+      setSaveError('You must be logged in to generate a cover letter');
+      setIsJobDescriptionModalOpen(false);
+      return;
+    }
+    
+    try {
+      setIsGenerating(true);
+      
+      // Get the most recent resume for user profile data
+      const mostRecentResume = userResumes.length > 0 ? userResumes[0] : null;
+      
+      if (!mostRecentResume) {
+        setSaveError('You need to create a resume first to generate a cover letter');
+        setIsJobDescriptionModalOpen(false);
+        setIsGenerating(false);
+        return;
+      }
+      
+      // Extract skills from resume
+      const skills = mostRecentResume.skills?.map(skill => skill.name) || [];
+      
+      // Extract experience from resume
+      const experienceText = mostRecentResume.experience?.map(exp => 
+        `${exp.jobTitle} at ${exp.employer} (${exp.startDate} - ${exp.current ? 'Present' : exp.endDate || 'N/A'}): ${exp.description}`
+      ).join('\n\n') || '';
+      
+      // Prepare user profile for Gemini API
+      const userProfile = {
+        name: `${mostRecentResume.personal.firstName} ${mostRecentResume.personal.lastName}`,
+        email: mostRecentResume.personal.email,
+        phone: mostRecentResume.personal.phone,
+        address: [
+          mostRecentResume.personal.address,
+          mostRecentResume.personal.city,
+          mostRecentResume.personal.state,
+          mostRecentResume.personal.zipCode,
+          mostRecentResume.personal.country
+        ].filter(Boolean).join(', '),
+        skills: skills,
+        experience: experienceText || mostRecentResume.professionalSummary || ''
+      };
+      
+      // Generate cover letter with Gemini API
+      const generatedContent = await generateCoverLetter(jobDescription, userProfile);
+      
+      // Update form with generated content
+      setValue('recipientName', generatedContent.recipientName || 'Hiring Manager', { shouldDirty: true });
+      setValue('recipientCompany', generatedContent.recipientCompany || '', { shouldDirty: true });
+      setValue('position', generatedContent.position || '', { shouldDirty: true });
+      setValue('introduction', generatedContent.introduction || '', { shouldDirty: true });
+      setValue('body', generatedContent.body || '', { shouldDirty: true });
+      setValue('conclusion', generatedContent.conclusion || '', { shouldDirty: true });
+      
+      // Set a default name for the cover letter based on position
+      if (!watch('name') && generatedContent.position) {
+        setValue('name', `Cover Letter - ${generatedContent.position}`, { shouldDirty: true });
+      }
+      
+      // Close modal and show success message
+      setIsJobDescriptionModalOpen(false);
+      setSaveSuccess(true);
+      
+      // Reset success message after a delay
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error generating cover letter:', error);
+      setSaveError(error instanceof Error ? error.message : 'Failed to generate cover letter');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+  
+  // Create a manual submit function that bypasses the isDirty check
+  const handleManualSubmit = async () => {
+    console.log('Manual submit triggered');
+    
+    // Trigger validation on all fields
+    const isFormValid = await trigger();
+    console.log('Form validation result:', isFormValid);
+    
+    if (isFormValid) {
+      // Get current form values
+      const formValues = {
+        name: watch('name'),
+        recipientName: watch('recipientName'),
+        recipientCompany: watch('recipientCompany'),
+        position: watch('position'),
+        introduction: watch('introduction'),
+        body: watch('body'),
+        conclusion: watch('conclusion'),
+        signature: watch('signature'),
+        address: watch('address'),
+        phone: watch('phone'),
+        email: watch('email'),
+        userId: currentUser?.uid || ''
+      };
+      
+      // Call the onSubmit function directly
+      await onSubmit(formValues);
+    } else {
+      console.log('Form has validation errors, cannot submit');
+    }
+  };
+  
   if (loading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : ''}`}>
@@ -186,6 +326,21 @@ export function CoverLetterBuilder() {
             {coverId ? 'Edit Cover Letter' : 'Create a Cover Letter'}
           </h1>
         </div>
+        
+        {/* Add AI generation button */}
+        <button
+          type="button"
+          onClick={() => setIsJobDescriptionModalOpen(true)}
+          className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm ${
+            theme === 'dark'
+              ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+              : 'bg-indigo-600 text-white hover:bg-indigo-700'
+          }`}
+          disabled={isGenerating || !currentUser}
+        >
+          <FaMagic className="mr-2" />
+          Generate with AI
+        </button>
       </div>
       
       {saveSuccess && (
@@ -209,6 +364,20 @@ export function CoverLetterBuilder() {
               </p>
             </div>
           </div>
+        </div>
+      )}
+      
+      {/* Add debug info */}
+      {Object.keys(errors).length > 0 && (
+        <div className={`mb-6 ${theme === 'dark' ? 'bg-yellow-900 border-l-4 border-yellow-600 p-4' : 'bg-yellow-50 border-l-4 border-yellow-400 p-4'}`}>
+          <p className={`text-sm ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-700'}`}>
+            Please fix the following errors before saving:
+          </p>
+          <ul className={`list-disc pl-5 mt-2 text-sm ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-700'}`}>
+            {Object.entries(errors).map(([field, error]) => (
+              <li key={field}>{field}: {error.message as string}</li>
+            ))}
+          </ul>
         </div>
       )}
       
@@ -575,9 +744,10 @@ export function CoverLetterBuilder() {
         
         <div className="flex justify-end">
           <button
-            type="submit"
-            disabled={saving || !isDirty}
+            type="button"
+            disabled={saving}
             className="btn btn-primary flex items-center"
+            onClick={handleManualSubmit}
           >
             {saving ? (
               <>
@@ -593,6 +763,14 @@ export function CoverLetterBuilder() {
           </button>
         </div>
       </form>
+      
+      {/* Job Description Modal */}
+      <JobDescriptionModal
+        isOpen={isJobDescriptionModalOpen}
+        onClose={() => setIsJobDescriptionModalOpen(false)}
+        onSubmit={handleJobDescriptionSubmit}
+        isLoading={isGenerating}
+      />
     </div>
   );
 } 

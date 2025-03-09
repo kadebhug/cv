@@ -12,7 +12,7 @@ export const colorThemes: ColorTheme[] = [
   { 
     id: 'green', 
     name: 'Green', 
-    primary: '#059669', // Forest green
+    primary: '#16a34a', // Changed to a different green
     secondary: '#a7f3d0' 
   },
   { 
@@ -68,7 +68,7 @@ export const colorThemes: ColorTheme[] = [
   { 
     id: 'emerald', 
     name: 'Emerald', 
-    primary: '#059669', 
+    primary: '#059669', // Original emerald color
     secondary: '#6ee7b7' 
   },
   { 
