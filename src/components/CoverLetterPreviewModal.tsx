@@ -17,12 +17,14 @@ interface CoverLetterData {
   name: string;
   recipientName: string;
   recipientCompany: string;
-  recipientAddress?: string;
   position: string;
   introduction: string;
   body: string;
   conclusion: string;
   signature: string;
+  address: string;
+  phone: string;
+  email: string;
   createdAt?: Date;
   updatedAt?: Date;
   userId: string;
@@ -125,6 +127,17 @@ const CoverLetterPDF = ({ coverLetter, formattedDate, userSignature }: {
   // Extract name and position from signature
   const extractNameAndPosition = (signature: string) => {
     if (!signature) return { name: '[Your Name]', position: 'Professional' };
+    
+    // Check if signature is a data URL (image)
+    if (signature.startsWith('data:image')) {
+      // For image signatures, use the cover letter name as the signer's name
+      return {
+        name: coverLetter.name || '[Your Name]',
+        position: coverLetter.position || 'Professional'
+      };
+    }
+    
+    // For text signatures, parse as before
     const parts = signature.split(',');
     return {
       name: parts.length > 1 ? parts[1].trim() : parts[0].trim(),
@@ -134,13 +147,20 @@ const CoverLetterPDF = ({ coverLetter, formattedDate, userSignature }: {
 
   const { name, position } = extractNameAndPosition(coverLetter.signature);
 
+  // Safely check if userSignature is a valid image data URL
+  const isValidImageSignature = userSignature && 
+    typeof userSignature === 'string' && 
+    userSignature.startsWith('data:image');
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Sender Information */}
         <View style={styles.header}>
           <Text style={styles.senderName}>{name.toUpperCase()}</Text>
-          <Text style={styles.contactInfo}>123 Your Street, City, State ZIP • (555) 123-4567 • your.email@example.com</Text>
+          <Text style={styles.contactInfo}>
+            {coverLetter.address} • {coverLetter.phone} • {coverLetter.email}
+          </Text>
         </View>
 
         {/* Date */}
@@ -153,7 +173,6 @@ const CoverLetterPDF = ({ coverLetter, formattedDate, userSignature }: {
           <Text>{coverLetter.recipientName}</Text>
           <Text>{coverLetter.position}</Text>
           <Text>{coverLetter.recipientCompany}</Text>
-          {coverLetter.recipientAddress && <Text>{coverLetter.recipientAddress}</Text>}
         </View>
 
         {/* Salutation */}
@@ -188,7 +207,7 @@ const CoverLetterPDF = ({ coverLetter, formattedDate, userSignature }: {
         {/* Signature */}
         <View style={styles.closing}>
           <Text>Sincerely,</Text>
-          {userSignature ? (
+          {isValidImageSignature ? (
             <View style={styles.signatureImage}>
               <Image src={userSignature} style={{ width: 150, height: 50 }} />
             </View>
@@ -216,14 +235,26 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
       try {
         setLoading(true);
         const data = await getCoverLetter(coverId);
-        setCoverLetter(data);
         
-        // Check if the signature field contains an image URL
-        if (data && data.signature && data.signature.startsWith('data:image')) {
-          setUserSignature(data.signature);
-        } else {
-          // If not, try to load the user's signature from Firestore
-          loadUserSignature();
+        // Ensure data has all required fields, add defaults if missing
+        if (data) {
+          // Add default values for contact fields if they don't exist
+          // This handles backward compatibility with existing cover letters
+          const completeData = {
+            ...data,
+            address: data.address || '123 Your Street, City, Country, Zip Code',
+            phone: data.phone || '(+27) 12-345-6789',
+            email: data.email || 'email@example.com'
+          };
+          setCoverLetter(completeData);
+          
+          // Check if the signature field contains an image URL
+          if (data.signature && data.signature.startsWith('data:image')) {
+            setUserSignature(data.signature);
+          } else {
+            // If not, try to load the user's signature from Firestore
+            loadUserSignature();
+          }
         }
       } catch (error) {
         console.error('Error loading cover letter:', error);
@@ -285,16 +316,63 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
         />
       ).toBlob();
       
+      // Create a simple, clean filename that doesn't include any potentially problematic data
+      // Format: CoverLetter_CompanyName_Position.pdf
+      
+      // Safely extract and clean company name
+      let cleanCompanyName = '';
+      try {
+        cleanCompanyName = coverLetter.recipientCompany
+          .replace(/[^\w\s-]/g, '')
+          .trim()
+          .replace(/\s+/g, '_')
+          .substring(0, 30); // Limit length
+      } catch (e) {
+        console.error('Error cleaning company name:', e);
+      }
+      
+      // Safely extract and clean position
+      let cleanPosition = '';
+      try {
+        cleanPosition = coverLetter.position
+          .replace(/[^\w\s-]/g, '')
+          .trim()
+          .replace(/\s+/g, '_')
+          .substring(0, 30); // Limit length
+      } catch (e) {
+        console.error('Error cleaning position:', e);
+      }
+      
+      // Create a descriptive filename
+      let filename = 'Cover_Letter';
+      
+      // Add company name if available and valid
+      if (cleanCompanyName && cleanCompanyName.length > 0) {
+        filename += `_${cleanCompanyName}`;
+      }
+      
+      // Add position if available and valid
+      if (cleanPosition && cleanPosition.length > 0) {
+        filename += `_${cleanPosition}`;
+      }
+      
+      // Add date to ensure uniqueness
+      const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      filename += `_${dateStr}`;
+      
       // Create download link
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${coverLetter.name.replace(/\s+/g, '_')}.pdf`;
+      link.download = `${filename}.pdf`;
       
       // Trigger download
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // Clean up the URL object
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
@@ -314,6 +392,11 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
     const parts = signature.split(',');
     return parts.length > 1 ? parts[1].trim() : parts[0].trim();
   };
+
+  // Safely check if userSignature is a valid image data URL
+  const isValidImageSignature = userSignature && 
+    typeof userSignature === 'string' && 
+    userSignature.startsWith('data:image');
 
   return (
     <div 
@@ -350,7 +433,9 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
               {/* Preview of the cover letter in HTML format */}
               <div className="mb-8 pb-4 border-b border-gray-200">
                 <h1 className="text-2xl font-bold uppercase text-gray-800">{extractName(coverLetter.signature)}</h1>
-                <p className="text-sm text-gray-600">123 Your Street, City, State ZIP • (555) 123-4567 • your.email@example.com</p>
+                <p className="text-sm text-gray-600">
+                  {coverLetter.address} • {coverLetter.phone} • {coverLetter.email}
+                </p>
               </div>
 
               <div className="mb-6 text-right">
@@ -361,7 +446,6 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
                 <p className="font-medium">{coverLetter.recipientName}</p>
                 <p>{coverLetter.position}</p>
                 <p>{coverLetter.recipientCompany}</p>
-                {coverLetter.recipientAddress && <p>{coverLetter.recipientAddress}</p>}
               </div>
 
               <div className="mb-4">
@@ -392,7 +476,7 @@ export function CoverLetterPreviewModal({ coverId, onClose }: CoverLetterPreview
               <div className="mt-8">
                 <p>Sincerely,</p>
                 <div className="mt-10 mb-1">
-                  {userSignature ? (
+                  {isValidImageSignature ? (
                     <img src={userSignature} alt="Your signature" className="max-h-16" />
                   ) : (
                     <p className={`font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>

@@ -302,17 +302,6 @@ export function DashboardPage() {
                 Resumes
               </button>
               <button
-                onClick={() => setActiveTab('jobSearch')}
-                className={`py-4 px-6 font-medium text-sm flex items-center justify-center transition-all duration-300 border-b-2 ${
-                  activeTab === 'jobSearch'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-gray-600 hover:text-indigo-600 hover:border-indigo-300'
-                }`}
-              >
-                <FaBriefcase className="mr-2 h-4 w-4" />
-                Job Search
-              </button>
-              <button
                 onClick={() => setActiveTab('coverLetters')}
                 className={`py-4 px-6 font-medium text-sm flex items-center justify-center transition-all duration-300 border-b-2 ${
                   activeTab === 'coverLetters'
@@ -323,6 +312,18 @@ export function DashboardPage() {
                 <FaEnvelope className="mr-2 h-4 w-4" />
                 Cover Letters
               </button>
+              <button
+                onClick={() => setActiveTab('jobSearch')}
+                className={`py-4 px-6 font-medium text-sm flex items-center justify-center transition-all duration-300 border-b-2 ${
+                  activeTab === 'jobSearch'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-600 hover:text-indigo-600 hover:border-indigo-300'
+                }`}
+              >
+                <FaBriefcase className="mr-2 h-4 w-4" />
+                Job Search
+              </button>
+              
               <button
                 onClick={() => setActiveTab('interviews')}
                 className={`py-4 px-6 font-medium text-sm flex items-center justify-center transition-all duration-300 border-b-2 ${

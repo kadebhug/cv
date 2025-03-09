@@ -26,12 +26,15 @@ interface CoverLetterData {
   name: string;
   recipientName: string;
   recipientCompany: string;
-  recipientAddress?: string;
   position: string;
   introduction: string;
   body: string;
   conclusion: string;
   signature: string;
+  // Contact information fields
+  address: string;
+  phone: string;
+  email: string;
   createdAt?: Date;
   updatedAt?: Date;
   userId: string;

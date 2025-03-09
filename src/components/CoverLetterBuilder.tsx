@@ -13,12 +13,14 @@ interface CoverLetterData {
   name: string;
   recipientName: string;
   recipientCompany: string;
-  recipientAddress?: string;
   position: string;
   introduction: string;
   body: string;
   conclusion: string;
   signature: string;
+  address: string;
+  phone: string;
+  email: string;
   createdAt?: Date;
   updatedAt?: Date;
   userId: string;
@@ -58,12 +60,14 @@ export function CoverLetterBuilder() {
       name: '',
       recipientName: '',
       recipientCompany: '',
-      recipientAddress: '',
       position: '',
       introduction: '',
       body: '',
       conclusion: '',
       signature: '',
+      address: '',
+      phone: '',
+      email: currentUser?.email || '',
       userId: currentUser?.uid || ''
     }
   });
@@ -80,7 +84,16 @@ export function CoverLetterBuilder() {
           const coverLetterData = await getCoverLetter(coverId);
           if (coverLetterData && coverLetterData.userId === currentUser.uid) {
             console.log('Loaded cover letter:', coverLetterData);
-            reset(coverLetterData);
+            
+            // Ensure backward compatibility with existing cover letters
+            const completeData = {
+              ...coverLetterData,
+              address: coverLetterData.address || '',
+              phone: coverLetterData.phone || '',
+              email: coverLetterData.email || currentUser.email || ''
+            };
+            
+            reset(completeData);
             
             // If there's a signature image URL in the signature field, set it
             if (coverLetterData.signature && coverLetterData.signature.startsWith('data:image')) {
@@ -173,23 +186,6 @@ export function CoverLetterBuilder() {
             {coverId ? 'Edit Cover Letter' : 'Create a Cover Letter'}
           </h1>
         </div>
-        <button
-          onClick={handleSubmit(onSubmit)}
-          disabled={saving || !isDirty}
-          className={`inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${theme === 'dark' ? 'bg-indigo-700 hover:bg-indigo-800' : 'bg-indigo-600 hover:bg-indigo-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-colors`}
-        >
-          {saving ? (
-            <>
-              <FaSpinner className="animate-spin mr-2 h-4 w-4" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <FaSave className="mr-2 h-4 w-4" />
-              Save Cover Letter
-            </>
-          )}
-        </button>
       </div>
       
       {saveSuccess && (
@@ -339,24 +335,108 @@ export function CoverLetterBuilder() {
                   <p className="mt-2 text-sm text-red-600">{errors.recipientCompany.message}</p>
                 )}
               </div>
-              
+            </div>
+          </div>
+        </div>
+        
+        <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg rounded-lg overflow-hidden`}>
+          <div className={`px-6 py-5 ${theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200'}`}>
+            <h3 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Your Contact Information</h3>
+            <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>This information will appear in your cover letter header.</p>
+          </div>
+          <div className={`px-6 py-6`}>
+            <div className="grid grid-cols-1 gap-y-8 gap-x-6 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label htmlFor="recipientAddress" className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Company Address (Optional)
+                <label htmlFor="address" className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Your Address
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <input
                     type="text"
-                    id="recipientAddress"
+                    id="address"
                     className={`block w-full px-4 py-3 text-base ${
                       theme === 'dark' 
                         ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500' 
                         : 'border-gray-300 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500'
-                    } rounded-md transition-colors`}
-                    placeholder="123 Main St, City, State, ZIP"
-                    {...register('recipientAddress')}
+                    } rounded-md transition-colors ${errors.address ? (theme === 'dark' ? 'border-red-500' : 'border-red-300') : ''}`}
+                    placeholder="123 Your Street, City, Country, Zip Code"
+                    {...register('address', { required: 'Your address is required' })}
                   />
+                  {errors.address && (
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
+                {errors.address && (
+                  <p className="mt-2 text-sm text-red-600">{errors.address.message}</p>
+                )}
+              </div>
+              
+              <div>
+                <label htmlFor="phone" className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Phone Number
+                </label>
+                <div className="relative rounded-md shadow-sm">
+                  <input
+                    type="tel"
+                    id="phone"
+                    className={`block w-full px-4 py-3 text-base ${
+                      theme === 'dark' 
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500' 
+                        : 'border-gray-300 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500'
+                    } rounded-md transition-colors ${errors.phone ? (theme === 'dark' ? 'border-red-500' : 'border-red-300') : ''}`}
+                    placeholder="(+27) 12-345-6789"
+                    {...register('phone', { required: 'Phone number is required' })}
+                  />
+                  {errors.phone && (
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                {errors.phone && (
+                  <p className="mt-2 text-sm text-red-600">{errors.phone.message}</p>
+                )}
+              </div>
+              
+              <div>
+                <label htmlFor="email" className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Email Address
+                </label>
+                <div className="relative rounded-md shadow-sm">
+                  <input
+                    type="email"
+                    id="email"
+                    className={`block w-full px-4 py-3 text-base ${
+                      theme === 'dark' 
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500' 
+                        : 'border-gray-300 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500'
+                    } rounded-md transition-colors ${errors.email ? (theme === 'dark' ? 'border-red-500' : 'border-red-300') : ''}`}
+                    placeholder="email@example.com"
+                    {...register('email', { 
+                      required: 'Email address is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: "Invalid email address"
+                      }
+                    })}
+                  />
+                  {errors.email && (
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                {errors.email && (
+                  <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
+                )}
               </div>
             </div>
           </div>
