@@ -9,6 +9,7 @@ import { ResumePreviewModal } from '../components/ResumePreviewModal';
 import { CoverLetterPreviewModal } from '../components/CoverLetterPreviewModal';
 import { JobSearch } from '../components/JobSearch';
 import { useTheme } from '../contexts/ThemeContext';
+import { ResumeWizardModal } from '../components/ResumeWizardModal';
 
 // Cover Letter Data Interface
 interface CoverLetterData {
@@ -37,6 +38,7 @@ export function DashboardPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
+  const [showWizardModal, setShowWizardModal] = useState(false);
 
   useEffect(() => {
     // Wait for auth to initialize before checking user
@@ -242,6 +244,8 @@ export function DashboardPage() {
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} py-8`}>
+      {showWizardModal && <ResumeWizardModal isOpen={showWizardModal} onClose={() => setShowWizardModal(false)} />}
+
       {previewResumeId && (
         <ResumePreviewModal 
           resumeId={previewResumeId} 
@@ -352,13 +356,22 @@ export function DashboardPage() {
             <div>
               <div className={`p-5 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} flex justify-between items-center`}>
                 <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>My Resumes</h2>
-                <Link
-                  to="/create-resume"
-                  className="btn btn-primary"
-                >
-                  <FaPlus className="mr-2 h-4 w-4" />
-                  Create New Resume
-                </Link>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setShowWizardModal(true)}
+                    className="btn btn-secondary"
+                  >
+                    <FaPlus className="mr-2 h-4 w-4" />
+                    Create with Wizard
+                  </button>
+                  <Link
+                    to="/create-resume"
+                    className="btn btn-primary"
+                  >
+                    <FaPlus className="mr-2 h-4 w-4" />
+                    Create New Resume
+                  </Link>
+                </div>
               </div>
               
               {resumes.length === 0 ? (
