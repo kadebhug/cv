@@ -76,6 +76,12 @@ export const colorThemes: ColorTheme[] = [
     name: 'Slate', 
     primary: '#334155', 
     secondary: '#cbd5e1' 
+  },
+  { 
+    id: 'pink', 
+    name: 'Pink', 
+    primary: '#ec4899', 
+    secondary: '#f97316' 
   }
 ];
 
