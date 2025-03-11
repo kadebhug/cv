@@ -5,7 +5,7 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { resumeSchema } from '../schemas/resumeSchemas'
 import { ResumeData } from '../types/resume'
-import { FaUser, FaFileAlt, FaBriefcase, FaGraduationCap, FaTools, FaLink, FaPuzzlePiece, FaHeart, FaChevronLeft, FaChevronRight, FaBars, FaTimes, FaPalette, FaCheck, FaRobot, FaLightbulb, FaLayerGroup, FaEdit, FaLinkedin, FaSpinner, FaSave } from 'react-icons/fa'
+import { FaUser, FaFileAlt, FaBriefcase, FaGraduationCap, FaTools, FaLink, FaPuzzlePiece, FaHeart, FaChevronLeft, FaChevronRight, FaBars, FaTimes, FaPalette, FaCheck, FaRobot, FaLightbulb, FaLayerGroup, FaEdit, FaLinkedin, FaSpinner, FaSave, FaCertificate, FaProjectDiagram, FaTrophy } from 'react-icons/fa'
 import { ResumeFeedback } from './ResumeFeedback'
 import { ATSOptimizer } from './ATSOptimizer'
 import { TemplateSelector } from './TemplateSelector'
@@ -21,9 +21,12 @@ const sections = [
   { id: 'experience', title: 'Work Experience', icon: FaBriefcase, description: 'Your work history and achievements' },
   { id: 'education', title: 'Education', icon: FaGraduationCap, description: 'Your academic background' },
   { id: 'skills', title: 'Skills', icon: FaTools, description: 'Your technical and soft skills' },
+  { id: 'certifications', title: 'Certifications & Licenses', icon: FaCertificate, description: 'Your professional certifications and licenses' },
+  { id: 'projects', title: 'Projects', icon: FaProjectDiagram, description: 'Your personal or professional projects' },
+  { id: 'achievements', title: 'Achievements & Awards', icon: FaTrophy, description: 'Your notable achievements and awards' },
   { id: 'social', title: 'Social Links', icon: FaLink, description: 'Your professional online presence' },
-  { id: 'custom', title: 'Custom Sections', icon: FaPuzzlePiece, description: 'Add custom sections to your resume' },
   { id: 'hobbies', title: 'Hobbies', icon: FaHeart, description: 'Your interests and activities' },
+  { id: 'custom', title: 'Custom Sections', icon: FaPuzzlePiece, description: 'Add custom sections to your resume' },
   { id: 'feedback', title: 'Feedback & Optimization', icon: FaLightbulb, description: 'Get feedback and optimize your resume' },
   { id: 'linkedin', title: 'LinkedIn Import', icon: FaLinkedin, description: 'Import your profile from LinkedIn' },
 ] as const
@@ -344,9 +347,8 @@ export function ResumeBuilder() {
     }
 
     setIsSaving(true);
-    setSaveSuccess(false);
     setSaveError('');
-
+    
     try {
       const formData = methods.getValues();
       
@@ -358,6 +360,9 @@ export function ResumeBuilder() {
         education: formData.education || [],
         skills: formData.skills || [],
         socialLinks: formData.socialLinks || [],
+        certifications: formData.certifications || [],
+        projects: formData.projects || [],
+        customSections: formData.customSections || [],
         theme: {
           template: selectedTemplate,
           color: selectedColorTheme.id
@@ -368,6 +373,9 @@ export function ResumeBuilder() {
       console.log('Education:', resumeData.education);
       console.log('Experience:', resumeData.experience);
       console.log('Skills:', resumeData.skills);
+      console.log('Certifications:', resumeData.certifications);
+      console.log('Projects:', resumeData.projects);
+      console.log('Custom Sections:', resumeData.customSections);
 
       if (resumeId) {
         // Update existing resume

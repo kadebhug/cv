@@ -63,6 +63,13 @@ export const projectSchema = z.object({
   current: z.boolean().optional(),
 })
 
+export const achievementSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  issuer: z.string().min(1, 'Issuer/Organization is required'),
+  date: z.string().optional(),
+  description: z.string().optional(),
+})
+
 export const organizationSchema = z.object({
   name: z.string().min(1, 'Organization name is required'),
   role: z.string().min(1, 'Role is required'),
@@ -103,6 +110,7 @@ export const resumeSchema = z.object({
   courses: z.array(courseSchema).optional(),
   certifications: z.array(certificationSchema).optional(),
   projects: z.array(projectSchema).optional(),
+  achievements: z.array(achievementSchema).optional(),
   organizations: z.array(organizationSchema).optional(),
   customSections: z.array(customSectionSchema).optional(),
   hobbies: z.array(z.string()).optional(),

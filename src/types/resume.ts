@@ -7,7 +7,6 @@ export interface PersonalInfo {
   phone: string;
   address?: string;
   city?: string;
-  state?: string;
   zipCode?: string;
   country?: string;
   jobTitle?: string;
@@ -96,10 +95,18 @@ export interface ResumeTheme {
   font?: string;
 }
 
+export interface Achievement {
+  title: string;
+  issuer: string;
+  date?: string;
+  description?: string;
+}
+
 export interface ResumeData {
   id?: string;
   userId?: string;
   name?: string;
+  industry?: string;
   personal: PersonalInfo;
   experience?: Experience[];
   education?: Education[];
@@ -113,7 +120,8 @@ export interface ResumeData {
   courses?: Course[];
   projects?: Project[];
   organizations?: Organization[];
+  achievements?: Achievement[];
   customSections?: CustomSection[];
   createdAt?: Date;
   updatedAt?: Date;
-} 
+}

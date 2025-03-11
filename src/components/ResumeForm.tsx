@@ -4,6 +4,10 @@ import { ExperienceSection } from './sections/ExperienceSection'
 import { EducationSection } from './sections/EducationSection'
 import { SkillsSection } from './sections/SkillsSection'
 import { SocialLinksSection } from './sections/SocialLinksSection'
+import { CertificationsSection } from './sections/CertificationsSection'
+import { ProjectsSection } from './sections/ProjectsSection'
+import { AchievementsSection } from './sections/AchievementsSection'
+import { HobbiesSection } from './sections/HobbiesSection'
 
 const sectionComponents = {
   personal: PersonalSection,
@@ -12,6 +16,10 @@ const sectionComponents = {
   education: EducationSection,
   skills: SkillsSection,
   social: SocialLinksSection,
+  certifications: CertificationsSection,
+  projects: ProjectsSection,
+  achievements: AchievementsSection,
+  hobbies: HobbiesSection,
 } as const
 
 interface ResumeFormProps {
