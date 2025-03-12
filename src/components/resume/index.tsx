@@ -1,35 +1,18 @@
-import { TemplateSelector } from './TemplateSelector';
-import { ResumeData } from '../types/resume';
+import { ResumeProvider, useResumeContext } from './ResumeContext';
+import { PreviewDialog } from './PreviewDialog';
+import { ResumeScore } from './ResumeScore';
+import { FeedbackPanel } from './FeedbackPanel';
+import { OptionalSections } from './OptionalSections';
+import { ColorThemeSelector } from './ColorThemeSelector';
+import { ResumeHeader } from './ResumeHeader';
+import { MobileHeader } from './MobileHeader';
+import { FloatingActionButton } from './FloatingActionButton';
+import { ResumeContent } from './ResumeContent';
+import { ResumePreview } from './ResumePreview';
+import { templates, templateCategories, coreSections, optionalSections } from './sectionDefinitions';
+import { TemplateSelector } from '../TemplateSelector';
+import { ResumeData } from '../../types/resume';
 
-// Import all the modular components we created
-import {
-  ResumeProvider,
-  useResumeContext,
-  PreviewDialog,
-  MobileHeader,
-  FloatingActionButton,
-  ResumeContent,
-  ResumePreview,
-  templates,
-  templateCategories
-} from './resume';
-
-/**
- * Main ResumeBuilder component that uses the modular components
- * This is a wrapper around the ResumeProvider to maintain backward compatibility
- */
-export function ResumeBuilder() {
-  return (
-    <ResumeProvider>
-      <ResumeBuilderContent />
-    </ResumeProvider>
-  );
-}
-
-/**
- * The main content of the ResumeBuilder
- * This component is wrapped by the ResumeProvider
- */
 function ResumeBuilderContent() {
   const { 
     showTemplateSelector, 
@@ -45,7 +28,7 @@ function ResumeBuilderContent() {
   } = useResumeContext();
 
   return (
-    <div className="max-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Template Selector Modal */}
       {showTemplateSelector && (
         <TemplateSelector
@@ -90,4 +73,31 @@ function ResumeBuilderContent() {
       <FloatingActionButton />
     </div>
   );
-} 
+}
+
+export function ResumeBuilder() {
+  return (
+    <ResumeProvider>
+      <ResumeBuilderContent />
+    </ResumeProvider>
+  );
+}
+
+export {
+  ResumeProvider,
+  useResumeContext,
+  PreviewDialog,
+  ResumeScore,
+  FeedbackPanel,
+  OptionalSections,
+  ColorThemeSelector,
+  ResumeHeader,
+  MobileHeader,
+  FloatingActionButton,
+  ResumeContent,
+  ResumePreview,
+  templates,
+  templateCategories,
+  coreSections,
+  optionalSections
+}; 
